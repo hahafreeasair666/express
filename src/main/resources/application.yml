@@ -1,0 +1,60 @@
+server:
+  tomcat:
+    max-threads: 800
+    uri-encoding: UTF-8
+  session:
+    cookie:
+      http-only: true
+  context-path: /express
+  port: 6666
+
+info:
+  app:
+    name: "@project.name@" #从pom.xml中获取
+    description: "@project.description@"
+    version: "@project.version@"
+    spring-boot-version: "@project.parent.version@"
+
+spring:
+  application:
+    name: express
+  profiles:
+      active: test
+  cache:
+      type: redis
+  redis:
+      host: 120.79.72.230
+      password: mengxiang
+      pool:
+        max-active: 16
+        max-idle: 16
+        min-idle: 0
+        max-wait: -1
+      timeout: 10000
+      port: 6379
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+
+
+  http:
+    multipart:
+      max-file-size: 10MB
+  #data:
+    #mongodb:
+      #uri: mongodb://120.79.160.214:27017/local
+
+redis1:
+  host: 120.79.72.230
+  port: 6379
+  password: mengxiang
+
+
+mybatis:
+  mapper-locations: classpath:com/ch999/express/admin/mapper/xml/*Mapper.xml
+  type-aliases-package: com.ch999.express.admin.entity
+
+
+logging:
+  config: classpath:log4j2-dev.xml
+
