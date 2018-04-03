@@ -1,5 +1,7 @@
 package com.ch999.express.admin.service.impl;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.mapper.UserInfoMapper;
 import com.ch999.express.admin.service.UserInfoService;
@@ -17,4 +19,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
 
+    @Override
+    public Boolean ckeckCanUse(String type, String info) {
+        return this.selectOne(new EntityWrapper<UserInfo>().eq(type,info)) == null;
+    }
+
+    @Override
+    public Boolean insertUser(String userName, String pwd, String mobile) {
+        return this.insert(new UserInfo(userName,pwd,mobile));
+    }
 }

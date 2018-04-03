@@ -16,4 +16,11 @@ public class ExpressVO {
     private String address;
 
     private Map<String,Double> location;
+
+    public ExpressVO(String id, String title, String address, Map<String, Double> location) {
+        this.id = id;
+        this.title = title;
+        this.address = address;
+        this.location = location;
+    }
 }

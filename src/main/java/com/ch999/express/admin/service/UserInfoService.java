@@ -13,4 +13,20 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
+    /**
+     * 检测信息是否可用
+     * @param type
+     * @param info
+     * @return
+     */
+    Boolean ckeckCanUse(String type,String info);
+
+    /**
+     * 注册
+     * @param userName
+     * @param pwd
+     * @param mobile
+     * @return
+     */
+    Boolean insertUser(String userName,String pwd,String mobile);
 }

@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 
 @RunWith(SpringRunner.class)
@@ -32,7 +33,8 @@ public class ExpressApplicationTests {
 		System.out.println();*/
 		//List<UserInfo> test = userInfoMapper.test();
 		//List<ExpressVO> address = MapTools.getAddressByKeyWord("东北林业大学");
-		MapTools.getDistanceByPosition("45.736677,126.670352", "45.720472871,126.6417633")
+		//MapTools.getDistanceByPosition("45.736677,126.670352", "45.720472871,126.6417633");
+		List<Map<String, Object>> simpleExpressPoint = handleStaticJson.getSimpleExpressPoint();
 		System.out.println();
 	}
 
