@@ -6,7 +6,14 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotBlank;
+
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -16,7 +23,9 @@ import java.io.Serializable;
  * @author 
  * @since 2018-04-02
  */
+@Data
 @TableName("express_order")
+@NoArgsConstructor
 public class ExpressOrder extends Model<ExpressOrder> {
 
     private static final long serialVersionUID = 1L;
@@ -46,75 +55,70 @@ public class ExpressOrder extends Model<ExpressOrder> {
     @TableField("handle_state")
     private Integer handleState;
     /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private Date createTime;
+    /**
      * 删除标志
      */
     @TableField("del_flag")
     @TableLogic
     private Boolean delFlag;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getCreateUser() {
-        return createUser;
-    }
-
-    public void setCreateUser(Integer createUser) {
-        this.createUser = createUser;
-    }
-
-    public Integer getAddress() {
-        return address;
-    }
-
-    public void setAddress(Integer address) {
-        this.address = address;
-    }
-
-    public String getExpressInfo() {
-        return expressInfo;
-    }
-
-    public void setExpressInfo(String expressInfo) {
-        this.expressInfo = expressInfo;
-    }
-
-    public Integer getHandleState() {
-        return handleState;
-    }
-
-    public void setHandleState(Integer handleState) {
-        this.handleState = handleState;
-    }
-
-    public Boolean getDelFlag() {
-        return delFlag;
-    }
-
-    public void setDelFlag(Boolean delFlag) {
-        this.delFlag = delFlag;
-    }
-
     @Override
     protected Serializable pkVal() {
         return this.id;
     }
 
-    @Override
-    public String toString() {
-        return "ExpressOrder{" +
-        "id=" + id +
-        ", createUser=" + createUser +
-        ", address=" + address +
-        ", expressInfo=" + expressInfo +
-        ", handleState=" + handleState +
-        ", delFlag=" + delFlag +
-        "}";
+    @Data
+    @NoArgsConstructor
+    public static class ExpressInfo{
+
+        @NotNull(message = "快递名称不能为空")
+        @NotBlank(message = "快递名称不能为空")
+        private String expressName;
+
+        @NotNull(message = "快递点地址信息不能为空")
+        @NotBlank(message = "快递点地址信息不能为空")
+        private String expressAddress;
+
+        private String expressMobile;
+
+        @JsonIgnore
+        private Integer weight;
+
+        @JsonIgnore
+        private Double tip;
+
+        private Double price;
+
+        @JsonIgnore
+        private String code;
+
+        @NotNull(message = "快递点坐标不能为空")
+        @NotBlank(message = "快递点坐标不能为空")
+        @JsonIgnore
+        private String position;
+
+        public Double getTip() {
+            if(tip == null){
+                tip = 0.0;
+            }
+            return tip;
+        }
+
+        public String getCode() {
+            if(code == null){
+                code = "无";
+            }
+            return code;
+        }
+    }
+
+    public ExpressOrder(Integer createUser, Integer address) {
+        this.createUser = createUser;
+        this.address = address;
+        this.createTime = new Date();
     }
 }

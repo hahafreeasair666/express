@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
@@ -17,6 +19,7 @@ import java.io.Serializable;
  * @since 2018-04-02
  */
 @TableName("user_authentication")
+@NoArgsConstructor
 public class UserAuthentication extends Model<UserAuthentication> {
 
     private static final long serialVersionUID = 1L;
@@ -35,7 +38,7 @@ public class UserAuthentication extends Model<UserAuthentication> {
      * 身份证号
      */
     @TableField("ID_number")
-    private Integer idNumber;
+    private String idNumber;
     /**
      * 身份证正反照图片，存image表主键
      */
@@ -65,11 +68,11 @@ public class UserAuthentication extends Model<UserAuthentication> {
         this.userId = userId;
     }
 
-    public Integer getIdNumber() {
+    public String getIdNumber() {
         return idNumber;
     }
 
-    public void setIdNumber(Integer idNumber) {
+    public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
     }
 
@@ -103,5 +106,11 @@ public class UserAuthentication extends Model<UserAuthentication> {
         ", idPic=" + idPic +
         ", delFlag=" + delFlag +
         "}";
+    }
+
+    public UserAuthentication(Integer userId, String idNumber, String idPic) {
+        this.userId = userId;
+        this.idNumber = idNumber;
+        this.idPic = idPic;
     }
 }

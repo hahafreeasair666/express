@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * web端的拦截器
+ * 跨域拦截器
  * 
  * @author ZhenJin
  */

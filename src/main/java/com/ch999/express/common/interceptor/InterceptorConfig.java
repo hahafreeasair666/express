@@ -24,10 +24,14 @@ public class InterceptorConfig extends WebMvcConfigurerAdapter {
     @Resource
     private SimpleInterceptor simpleInterceptor;
 
+    @Resource
+    private LoginInterceptor loginInterceptor;
+
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(simpleInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(loginInterceptor).addPathPatterns("/**").excludePathPatterns("/login/api/**");
     }
 
 

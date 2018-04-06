@@ -6,7 +6,11 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -16,7 +20,9 @@ import java.io.Serializable;
  * @author 
  * @since 2018-04-02
  */
+@Data
 @TableName("express_user")
+@NoArgsConstructor
 public class ExpressUser extends Model<ExpressUser> {
 
     private static final long serialVersionUID = 1L;
@@ -41,52 +47,15 @@ public class ExpressUser extends Model<ExpressUser> {
     @TableField("del_flag")
     @TableLogic
     private Boolean delFlag;
-
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getExpressOrderId() {
-        return expressOrderId;
-    }
-
-    public void setExpressOrderId(Integer expressOrderId) {
-        this.expressOrderId = expressOrderId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public Boolean getDelFlag() {
-        return delFlag;
-    }
-
-    public void setDelFlag(Boolean delFlag) {
-        this.delFlag = delFlag;
-    }
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private Date createTime;
 
     @Override
     protected Serializable pkVal() {
         return this.id;
     }
 
-    @Override
-    public String toString() {
-        return "ExpressUser{" +
-        "id=" + id +
-        ", expressOrderId=" + expressOrderId +
-        ", userId=" + userId +
-        ", delFlag=" + delFlag +
-        "}";
-    }
 }

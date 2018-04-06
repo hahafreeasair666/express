@@ -6,7 +6,11 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -16,7 +20,9 @@ import java.io.Serializable;
  * @author 
  * @since 2018-04-02
  */
+@Data
 @TableName("express_comment")
+@NoArgsConstructor
 public class ExpressComment extends Model<ExpressComment> {
 
     private static final long serialVersionUID = 1L;
@@ -41,66 +47,20 @@ public class ExpressComment extends Model<ExpressComment> {
     @TableField("employer_comment")
     private String employerComment;
     /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private Date createTime;
+    /**
      * 删除标志
      */
     @TableField("del_flag")
     @TableLogic
     private Boolean delFlag;
 
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getExpressOrderId() {
-        return expressOrderId;
-    }
-
-    public void setExpressOrderId(Integer expressOrderId) {
-        this.expressOrderId = expressOrderId;
-    }
-
-    public Integer getStar() {
-        return star;
-    }
-
-    public void setStar(Integer star) {
-        this.star = star;
-    }
-
-    public String getEmployerComment() {
-        return employerComment;
-    }
-
-    public void setEmployerComment(String employerComment) {
-        this.employerComment = employerComment;
-    }
-
-    public Boolean getDelFlag() {
-        return delFlag;
-    }
-
-    public void setDelFlag(Boolean delFlag) {
-        this.delFlag = delFlag;
-    }
-
     @Override
     protected Serializable pkVal() {
         return this.id;
     }
 
-    @Override
-    public String toString() {
-        return "ExpressComment{" +
-        "id=" + id +
-        ", expressOrderId=" + expressOrderId +
-        ", star=" + star +
-        ", employerComment=" + employerComment +
-        ", delFlag=" + delFlag +
-        "}";
-    }
 }

@@ -52,7 +52,7 @@ public class  HandleStaticJson {
         Stream.of("顺丰速运","EMS（中国邮政）","申通快递","中通快递","圆通快递","天天快递","百世汇通","韵达快递","其他快递").forEach(li->{
             Map<String,Object> map = new HashMap<>();
             map.put("id",list.size()+1);
-            map.put("name",li);
+            map.put("title",li);
             list.add(map);
         });
         simpleExpressPoint = list;

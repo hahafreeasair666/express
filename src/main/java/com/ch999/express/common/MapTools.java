@@ -21,7 +21,7 @@ public class MapTools {
     /**
      * 人平均走路速度95m/s
      */
-    private static final Integer AVGWALKSPEED = 95;
+    public static final Double AVGWALKSPEED = 95.0;
 
     private static final String TENCENT_KEY = "IYRBZ-SI6WO-ERXWT-S7BSF-LB4F6-2WBAS";
 

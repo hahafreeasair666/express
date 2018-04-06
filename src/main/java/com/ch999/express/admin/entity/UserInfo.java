@@ -43,7 +43,7 @@ public class UserInfo extends Model<UserInfo> {
      * 学号
      */
     @TableField("student_number")
-    private Integer studentNumber;
+    private String studentNumber;
     /**
      * 头像路径
      */
@@ -93,11 +93,11 @@ public class UserInfo extends Model<UserInfo> {
         this.realName = realName;
     }
 
-    public Integer getStudentNumber() {
+    public String getStudentNumber() {
         return studentNumber;
     }
 
-    public void setStudentNumber(Integer studentNumber) {
+    public void setStudentNumber(String studentNumber) {
         this.studentNumber = studentNumber;
     }
 

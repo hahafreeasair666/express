@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
@@ -15,6 +18,7 @@ import java.io.Serializable;
  * @author 
  * @since 2018-04-02
  */
+@NoArgsConstructor
 public class Address extends Model<Address> {
 
     private static final long serialVersionUID = 1L;
@@ -87,5 +91,30 @@ public class Address extends Model<Address> {
         ", addressInfo=" + addressInfo +
         ", delFlag=" + delFlag +
         "}";
+    }
+
+    public Address(Integer userId, String addressInfo) {
+        this.userId = userId;
+        this.addressInfo = addressInfo;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class AddressInfoVO{
+
+        private String address;
+
+        private String name;
+
+        private String mobile;
+
+        private String position;
+
+        public AddressInfoVO(String address, String name, String mobile, String position) {
+            this.address = address;
+            this.name = name;
+            this.mobile = mobile;
+            this.position = position;
+        }
     }
 }
