@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 /**
@@ -37,6 +39,7 @@ public class Image extends Model<Image> {
      */
     @TableField("del_flag")
     @TableLogic
+    @JsonIgnore
     private Boolean delFlag;
 
 

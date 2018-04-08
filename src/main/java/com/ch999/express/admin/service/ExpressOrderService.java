@@ -2,6 +2,7 @@ package com.ch999.express.admin.service;
 
 import com.ch999.express.admin.entity.ExpressOrder;
 import com.baomidou.mybatisplus.service.IService;
+import com.ch999.express.admin.vo.ExpressDetailVO;
 import com.ch999.express.admin.vo.ExpressListVO;
 
 import java.util.List;
@@ -48,5 +49,22 @@ public interface ExpressOrderService extends IService<ExpressOrder> {
      * @param position
      * @return
      */
-    List<ExpressListVO> getExpressList(String position);
+    List<ExpressListVO> getExpressList(String position,Boolean sortByPrice,Boolean sortByDistance1,Boolean sortByDistance2);
+
+    /**
+     * 根据订单id获取订单详情,接单者版
+     * @param position
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    ExpressListVO getOrderDetailById(String position,Integer userId,Integer orderId);
+
+    /**
+     * 根据订单id获取订单详情,下单者版
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    ExpressDetailVO getOrderDetailById(Integer userId,Integer orderId);
 }

@@ -6,20 +6,17 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * 代取快递者订单详情类
  * @author hahalala
  */
 @Data
 @NoArgsConstructor
-public class ExpressListVO {
+public class ExpressDetailVO {
 
     private Integer orderId;
 
-    private Map<String,Object> employerInfo;
+    private Map<String,Object> addressInfo;
 
     private Map<String,Object> expressInfo;
 
-    private Double price;
-
-    private Map<String,Object> distanceInfo;
+    private Map<String,Object> employeeInfo;
 }

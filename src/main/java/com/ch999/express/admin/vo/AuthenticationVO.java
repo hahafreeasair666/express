@@ -14,6 +14,13 @@ import javax.validation.constraints.NotNull;
 public class AuthenticationVO {
 
     /**
+     * 真实姓名
+     */
+    @NotNull(message = "真实姓名不能为空")
+    @NotBlank(message = "真实姓名不能为空")
+    private String realName;
+
+    /**
      * 身份证号
      */
     @NotNull(message = "身份证号码不能为空")

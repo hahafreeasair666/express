@@ -49,7 +49,7 @@ public class LoginApi {
         return Result.success();
     }
 
-    @GetMapping("/login/v1")
+    @PostMapping("/login/v1")
     public Result<Map<String, Object>> login(String loginInfo, String pwd, Boolean isLongLogin) {
         UserInfo userInfo = null;
         UserInfo userInfo2 = userInfoService.selectOne(new EntityWrapper<UserInfo>().eq("user_name", loginInfo).eq("pwd", pwd));

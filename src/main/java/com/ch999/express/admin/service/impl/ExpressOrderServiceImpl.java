@@ -5,21 +5,25 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.ch999.express.admin.document.UserWalletBO;
 import com.ch999.express.admin.entity.Address;
 import com.ch999.express.admin.entity.ExpressOrder;
+import com.ch999.express.admin.entity.ExpressUser;
+import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.mapper.ExpressOrderMapper;
 import com.ch999.express.admin.repository.UserWalletBORepository;
 import com.ch999.express.admin.service.AddressService;
 import com.ch999.express.admin.service.ExpressOrderService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.ch999.express.admin.service.ExpressUserService;
+import com.ch999.express.admin.service.UserInfoService;
+import com.ch999.express.admin.vo.ExpressDetailVO;
 import com.ch999.express.admin.vo.ExpressListVO;
 import com.ch999.express.common.MapTools;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -39,6 +43,12 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     @Resource
     private UserWalletBORepository userWalletBORepository;
 
+    @Resource
+    private ExpressUserService expressUserService;
+
+    @Resource
+    private UserInfoService userInfoService;
+
     @Override
     public Map<String, Object> addExpressOrder(Integer userId, Integer addressId, ExpressOrder.ExpressInfo expressInfo) {
         //先验算距离，收货地址到快递点超过10km不让发布
@@ -56,7 +66,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         jsonObject.put("expressMobile", expressInfo.getExpressMobile());
         jsonObject.put("position", expressInfo.getPosition());
         jsonObject.put("code", expressInfo.getCode());
-        jsonObject.put("weight",expressInfo.getWeight());
+        jsonObject.put("weight", expressInfo.getWeight());
         jsonObject.put("price", price);
         expressOrder.setExpressInfo(jsonObject.toJSONString());
         this.insert(expressOrder);
@@ -138,38 +148,78 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     }
 
     @Override
-    public List<ExpressListVO> getExpressList(String position) {
+    public List<ExpressListVO> getExpressList(String position, Boolean sortByPrice, Boolean sortByDistance1, Boolean sortByDistance2) {
         List<ExpressListVO> listVOS = new ArrayList<>();
         this.selectList(new EntityWrapper<ExpressOrder>().eq("handle_state", 1)).forEach(li -> {
-            ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(li.getExpressInfo(), ExpressOrder.ExpressInfo.class);
-            Integer distance = MapTools.getDistanceByPosition(expressInfo.getPosition(), position);
-            if (distance < 5000 && distance > 0) {
-                ExpressListVO expressListVO = new ExpressListVO();
-                expressListVO.setOrderId(li.getId());
-                Map addressInfo = JSONObject.parseObject(addressService.getAddressById(li.getAddress()).get("addressInfo").toString(), Map.class);
-                Map<String, Object> employerInfo = new HashMap<>();
-                Map<String, Object> liExpressInfo = new HashMap<>();
-                Map<String, Object> distanceInfo = new HashMap<>();
-                expressListVO.setEmployerInfo(employerInfo);
-                expressListVO.setExpressInfo(liExpressInfo);
-                expressListVO.setDistanceInfo(distanceInfo);
-                employerInfo.put("employerName", addressInfo.get("name"));
-                //employerInfo.put("employMobile",addressInfo.get("mobile").toString().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
-                employerInfo.put("employAddress", addressInfo.get("address"));
-                liExpressInfo.put("expressName", expressInfo.getExpressName());
-                liExpressInfo.put("expressAddress", expressInfo.getExpressAddress());
-                liExpressInfo.put("weight",getWeight(expressInfo.getWeight()));
-                //liExpressInfo.put("expressMobile",expressInfo.getExpressMobile());
-                expressListVO.setPrice(expressInfo.getPrice());
-                distanceInfo.put("distance1", distance + "米");
-                distanceInfo.put("tips1", "您到达快递点步行需要" + Math.ceil(distance / MapTools.AVGWALKSPEED) + "分钟");
-                Integer distance2 = MapTools.getDistanceByPosition(expressInfo.getPosition(), addressInfo.get("position").toString());
-                distanceInfo.put("distance2",distance2 + "米");
-                distanceInfo.put("tips2", "从快递点到收货点步行需要" + Math.ceil(distance2 / MapTools.AVGWALKSPEED) + "分钟");
+            ExpressListVO expressListVO = assembleExpressInfo(position, li, false);
+            if (expressListVO != null) {
                 listVOS.add(expressListVO);
             }
         });
-        return listVOS;
+        //排序
+        List<ExpressListVO> listVOS2 = new ArrayList<>();
+        if (sortByDistance2) {
+            listVOS2 = listVOS.stream().sorted(Comparator.comparing(li -> (int) li.getDistanceInfo().get("distance2"))).collect(Collectors.toList());
+        } else if (sortByDistance1) {
+            listVOS2 = listVOS.stream().sorted(Comparator.comparing(li -> (int) li.getDistanceInfo().get("distance1"))).collect(Collectors.toList());
+        } else if (sortByPrice) {
+            listVOS2 = listVOS.stream().sorted(Comparator.comparing(ExpressListVO::getPrice, Comparator.reverseOrder())).collect(Collectors.toList());
+        }
+        return CollectionUtils.isNotEmpty(listVOS2) ? listVOS2 : listVOS;
+    }
+
+    @Override
+    public ExpressListVO getOrderDetailById(String position, Integer userId, Integer orderId) {
+        ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId).eq("userId", userId));
+        if (expressUser == null) {
+            return null;
+        }
+        ExpressOrder expressOrder = this.selectById(orderId);
+        if (expressOrder != null) {
+            ExpressListVO expressListVO = assembleExpressInfo(position, expressOrder, true);
+            return expressListVO;
+        }
+        return new ExpressListVO();
+    }
+
+    @Override
+    public ExpressDetailVO getOrderDetailById(Integer userId, Integer orderId) {
+        ExpressDetailVO expressDetailVO = new ExpressDetailVO();
+        ExpressOrder expressOrder = this.selectById(orderId);
+        if (expressOrder == null) {
+            return expressDetailVO;
+        } else if (!expressOrder.getCreateUser().equals(userId)) {
+            return null;
+        } else {
+            Map<String, Object> addressInfo = new HashMap<>();
+            Map<String, Object> expressInfo = new HashMap<>();
+            Map<String, Object> employeeInfo = new HashMap<>();
+            expressDetailVO.setOrderId(orderId);
+            expressDetailVO.setAddressInfo(addressInfo);
+            expressDetailVO.setEmployeeInfo(employeeInfo);
+            expressDetailVO.setExpressInfo(expressInfo);
+            Map<String, Object> addressById = addressService.getAddressById(expressOrder.getAddress());
+            Address.AddressInfoVO addressInfoVO = JSONObject.parseObject(addressById.get("addressInfo").toString(), Address.AddressInfoVO.class);
+            addressInfo.put("name",addressInfoVO.getName());
+            addressInfo.put("mobile",addressInfoVO.getMobile());
+            addressInfo.put("address",addressInfoVO.getAddress());
+            ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId));
+            if(expressUser != null){
+                UserInfo userInfo = userInfoService.selectById(expressUser.getUserId());
+                employeeInfo.put("name",userInfo.getRealName());
+                employeeInfo.put("mobile",userInfo.getMobile());
+                Integer distanceByPosition = MapTools.getDistanceByPosition(expressUser.getPosition(), addressInfoVO.getPosition());
+                employeeInfo.put("distance","代取快递的人距离您" + distanceByPosition +"米");
+            }
+            ExpressOrder.ExpressInfo expressInfo1 = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
+            expressInfo.put("expressName",expressInfo1.getExpressName());
+            expressInfo.put("expressAddress",expressInfo1.getExpressAddress());
+            expressInfo.put("expressMobile",expressInfo1.getExpressMobile());
+            expressInfo.put("price",expressInfo1.getPrice());
+            expressInfo.put("weight",getWeight(expressInfo1.getWeight()));
+            expressInfo.put("code",expressInfo1.getCode());
+            return expressDetailVO;
+        }
     }
 
     private Double handlePrice(Integer weight, Integer distance, Double tip) {
@@ -185,12 +235,50 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         return weight * price + tip;
     }
 
-    private String getWeight(Integer weight){
-        switch (weight){
-            case 1: return "5公斤以内";
-            case 2: return  "5-10公斤";
-            case 3: return  "10公斤以上";
-            default: return "未知";
+    private String getWeight(Integer weight) {
+        switch (weight) {
+            case 1:
+                return "5公斤以内";
+            case 2:
+                return "5-10公斤";
+            case 3:
+                return "10公斤以上";
+            default:
+                return "未知";
         }
+    }
+
+    private ExpressListVO assembleExpressInfo(String position, ExpressOrder li, Boolean isGetDetail) {
+        ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(li.getExpressInfo(), ExpressOrder.ExpressInfo.class);
+        Integer distance = MapTools.getDistanceByPosition(expressInfo.getPosition(), position);
+        if (distance < 5000 && distance > 0) {
+            ExpressListVO expressListVO = new ExpressListVO();
+            expressListVO.setOrderId(li.getId());
+            Map addressInfo = JSONObject.parseObject(addressService.getAddressById(li.getAddress()).get("addressInfo").toString(), Map.class);
+            Map<String, Object> employerInfo = new HashMap<>();
+            Map<String, Object> liExpressInfo = new HashMap<>();
+            Map<String, Object> distanceInfo = new HashMap<>();
+            expressListVO.setEmployerInfo(employerInfo);
+            expressListVO.setExpressInfo(liExpressInfo);
+            expressListVO.setDistanceInfo(distanceInfo);
+            employerInfo.put("employerName", addressInfo.get("name"));
+            if (isGetDetail) {
+                employerInfo.put("employMobile", addressInfo.get("mobile"));
+                liExpressInfo.put("expressMobile", expressInfo.getExpressMobile());
+                liExpressInfo.put("code", expressInfo.getCode());
+            }
+            employerInfo.put("employAddress", addressInfo.get("address"));
+            liExpressInfo.put("expressName", expressInfo.getExpressName());
+            liExpressInfo.put("expressAddress", expressInfo.getExpressAddress());
+            liExpressInfo.put("weight", getWeight(expressInfo.getWeight()));
+            expressListVO.setPrice(expressInfo.getPrice());
+            distanceInfo.put("distance1", distance + "米");
+            distanceInfo.put("tips1", "您到达快递点步行需要" + Math.ceil(distance / MapTools.AVGWALKSPEED) + "分钟");
+            Integer distance2 = MapTools.getDistanceByPosition(expressInfo.getPosition(), addressInfo.get("position").toString());
+            distanceInfo.put("distance2", distance2 + "米");
+            distanceInfo.put("tips2", "从快递点到收货点步行需要" + Math.ceil(distance2 / MapTools.AVGWALKSPEED) + "分钟");
+            return expressListVO;
+        }
+        return null;
     }
 }

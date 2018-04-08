@@ -43,8 +43,9 @@ public class ImgServiceImpl implements ImgService {
             if (file.getSize() >= 1024 * 100) {
                 //lock.lock();
                 log.info("图片压缩");
-                Thumbnails.of(file.getInputStream()).size(200, 200).toFile(IdWorker.get32UUID() + ".jpg");
-                file1 = new File("test.jpg");
+                String str = IdWorker.get32UUID();
+                Thumbnails.of(file.getInputStream()).size(200, 200).toFile( str + ".jpg");
+                file1 = new File(str + ".jpg");
                 log.info("压缩完毕");
                 //lock.unlock();
             }

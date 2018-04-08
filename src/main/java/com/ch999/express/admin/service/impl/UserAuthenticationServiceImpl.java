@@ -29,6 +29,7 @@ public class UserAuthenticationServiceImpl extends ServiceImpl<UserAuthenticatio
     public Boolean userAuthentication(UserInfo loginUser, AuthenticationVO authenticationVO) {
         boolean insert = this.insert(new UserAuthentication(loginUser.getId(), authenticationVO.getIdNumber(), authenticationVO.getIdPic()));
         loginUser.setStudentNumber(authenticationVO.getStudentNumber());
+        loginUser.setRealName(authenticationVO.getRealName());
         boolean b = userInfoService.updateById(loginUser);
         return insert && b;
     }

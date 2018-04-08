@@ -36,6 +36,9 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
             return this.insert(address);
         }else {
             Address address = this.selectById(addUpdateAddressVO.getId());
+            if(!address.getUserId().equals(userId)){
+                return false;
+            }
             Address.AddressInfoVO addressInfoVO = new Address.AddressInfoVO(addUpdateAddressVO.getAddressInfo(),addUpdateAddressVO.getName(),addUpdateAddressVO.getMobile(),addUpdateAddressVO.getPosition());
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("addressInfo",addressInfoVO);

@@ -42,10 +42,11 @@ public class ExpressApplicationTests {
 		//List<Map<String, Object>> simpleExpressPoint = handleStaticJson.getSimpleExpressPoint();
 		//System.out.println();
 		//userWalletBORepository.save(new UserWalletBO(1));
-		UserWalletBO one = userWalletBORepository.findOne(1);
+		//erWalletBORepository.deleteAll();
+		UserWalletBO one = new UserWalletBO();
 		one.setBalance(100.0);
 		one.setIntegral(99999);
-		userWalletBORepository.save(one);
-	}
+		one.setCreditNum(100);
+		userWalletBORepository.save(one);	}
 
 }

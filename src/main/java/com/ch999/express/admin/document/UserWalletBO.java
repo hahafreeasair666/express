@@ -20,6 +20,8 @@ public class UserWalletBO {
 
     private Integer integral;
 
+    private Integer creditNum;
+
     public UserWalletBO(Integer userId) {
         this.userId = userId;
         this.balance = 0.0;

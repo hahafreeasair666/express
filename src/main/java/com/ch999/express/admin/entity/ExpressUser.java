@@ -52,10 +52,24 @@ public class ExpressUser extends Model<ExpressUser> {
      */
     @TableField("create_time")
     private Date createTime;
+    /**
+     * 完成标志
+     */
+    @TableField("complete_flag")
+    private Boolean completeFlag;
+    /**
+     * 接单者的位置
+     */
+    private String position;
 
     @Override
     protected Serializable pkVal() {
         return this.id;
     }
 
+    public ExpressUser(Integer expressOrderId, Integer userId) {
+        this.expressOrderId = expressOrderId;
+        this.userId = userId;
+        this.createTime = new Date();
+    }
 }
