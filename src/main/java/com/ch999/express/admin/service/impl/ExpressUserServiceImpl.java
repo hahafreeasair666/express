@@ -11,6 +11,7 @@ import com.ch999.express.admin.service.ExpressOrderService;
 import com.ch999.express.admin.service.ExpressUserService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.ch999.express.common.MapTools;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -83,5 +84,10 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
             li.setPosition(position);
             this.updateById(li);
         });
+    }
+
+    @Override
+    public Boolean checkIsPickUp(Integer userId) {
+        return CollectionUtils.isEmpty(this.selectList(new EntityWrapper<ExpressUser>().eq("userId",userId).eq("complete_flag",0)));
     }
 }

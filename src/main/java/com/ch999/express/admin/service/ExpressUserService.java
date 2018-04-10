@@ -30,4 +30,11 @@ public interface ExpressUserService extends IService<ExpressUser> {
      * @param position
      */
     void updatePosition(Integer userId,String position);
+
+    /**
+     * 检查是否为代取快递状态
+     * @param userId
+     * @return
+     */
+    Boolean checkIsPickUp(Integer userId);
 }

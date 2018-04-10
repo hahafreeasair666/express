@@ -19,7 +19,7 @@ public interface UserInfoService extends IService<UserInfo> {
      * @param info
      * @return
      */
-    Boolean ckeckCanUse(String type,String info);
+    Boolean checkCanUse(String type,String info);
 
     /**
      * 注册

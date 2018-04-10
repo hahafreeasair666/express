@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
 
     @Override
-    public Boolean ckeckCanUse(String type, String info) {
+    public Boolean checkCanUse(String type, String info) {
         return this.selectOne(new EntityWrapper<UserInfo>().eq(type,info)) == null;
     }
 

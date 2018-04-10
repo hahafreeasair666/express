@@ -182,6 +182,11 @@ public class ServiceApi {
         return Result.success();
     }
 
+    @GetMapping("/checkIsPickUp/v1")
+    public Result<Boolean> checkIsPickUp(){
+       return Result.success(expressUserService.checkIsPickUp(userComponent.getLoginUser().getId()));
+    }
+
     @GetMapping("getOrderDetailById2/v1")
     public Result<ExpressDetailVO> getOrderDetailById(Integer orderId){
         if(orderId == null){
