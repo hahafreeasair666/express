@@ -64,6 +64,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         jsonObject.put("expressName", expressInfo.getExpressName());
         jsonObject.put("expressAddress", expressInfo.getExpressAddress());
         jsonObject.put("expressMobile", expressInfo.getExpressMobile());
+        jsonObject.put("expressMsg", expressInfo.getExpressMsg());
         jsonObject.put("position", expressInfo.getPosition());
         jsonObject.put("code", expressInfo.getCode());
         jsonObject.put("weight", expressInfo.getWeight());
@@ -217,6 +218,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             expressInfo.put("expressName",expressInfo1.getExpressName());
             expressInfo.put("expressAddress",expressInfo1.getExpressAddress());
             expressInfo.put("expressMobile",expressInfo1.getExpressMobile());
+            expressInfo.put("expressMsg",expressInfo1.getExpressMsg());
             expressInfo.put("price",expressInfo1.getPrice());
             expressInfo.put("weight",getWeight(expressInfo1.getWeight()));
             expressInfo.put("code",expressInfo1.getCode());
@@ -267,6 +269,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             if (isGetDetail) {
                 employerInfo.put("employMobile", addressInfo.get("mobile"));
                 liExpressInfo.put("expressMobile", expressInfo.getExpressMobile());
+                liExpressInfo.put("expressMsg", expressInfo.getExpressMsg());
                 liExpressInfo.put("code", expressInfo.getCode());
             }
             employerInfo.put("employAddress", addressInfo.get("address"));

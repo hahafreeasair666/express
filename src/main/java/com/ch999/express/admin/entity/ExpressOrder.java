@@ -96,6 +96,8 @@ public class ExpressOrder extends Model<ExpressOrder> {
         @JsonIgnore
         private String code;
 
+        private String expressMsg;
+
         @NotNull(message = "快递点坐标不能为空")
         @NotBlank(message = "快递点坐标不能为空")
         @JsonIgnore
@@ -113,6 +115,13 @@ public class ExpressOrder extends Model<ExpressOrder> {
                 code = "无";
             }
             return code;
+        }
+
+        public String getExpressMsg() {
+            if(expressMsg == null){
+                expressMsg = "";
+            }
+            return expressMsg;
         }
     }
 
