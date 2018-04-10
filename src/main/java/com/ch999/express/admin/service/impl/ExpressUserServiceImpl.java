@@ -49,6 +49,11 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
             map.put("msg","订单已被别人抢先一步接了，再看看别的订单吧");
             return map;
         }else {
+            if(expressOrder.getCreateUser().equals(userId)){
+                map.put("code",5000);
+                map.put("msg","不能自己接自己的订单，不想代取了就去取消订单吧");
+                return map;
+            }
             ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
             if(MapTools.getDistanceByPosition(position,expressInfo.getPosition()) == -1){
                 map.put("code",5000);
@@ -88,6 +93,6 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
 
     @Override
     public Boolean checkIsPickUp(Integer userId) {
-        return CollectionUtils.isEmpty(this.selectList(new EntityWrapper<ExpressUser>().eq("userId",userId).eq("complete_flag",0)));
+        return CollectionUtils.isNotEmpty(this.selectList(new EntityWrapper<ExpressUser>().eq("userId",userId).eq("complete_flag",0)));
     }
 }

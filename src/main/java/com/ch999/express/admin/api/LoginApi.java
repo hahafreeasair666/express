@@ -58,7 +58,7 @@ public class LoginApi {
     public Result<Map<String, Object>> login(String loginInfo, String pwd, Boolean isLongLogin) {
         UserInfo userInfo = null;
         UserInfo userInfo2 = userInfoService.selectOne(new EntityWrapper<UserInfo>().eq("user_name", loginInfo).eq("pwd", pwd));
-        UserInfo userInfo1 = userInfoService.selectOne(new EntityWrapper<UserInfo>().eq("user_name", loginInfo).eq("pwd", pwd));
+        UserInfo userInfo1 = userInfoService.selectOne(new EntityWrapper<UserInfo>().eq("mobile", loginInfo).eq("pwd", pwd));
         userInfo = userInfo1 != null ? userInfo1 : userInfo2;
         if (userInfo == null) {
             return Result.error("error", "登录失败用户名密码不匹配");

@@ -111,6 +111,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             map.put("msg", "支付成功，本次支付：" + price + "元，余额：" + (one.getBalance() - price) + "元,获得：" + price.intValue() + "积分");
             one.setBalance(one.getBalance() - price);
             one.setIntegral(one.getIntegral() + price.intValue());
+            userWalletBORepository.save(one);
             expressOrder.setHandleState(1);
             this.updateById(expressOrder);
             log.info(userId + "：下单成功，余额积分已处理");
@@ -135,6 +136,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
             one.setBalance(one.getBalance() + expressInfo.getPrice());
             one.setIntegral(one.getIntegral() - expressInfo.getPrice().intValue());
+            userWalletBORepository.save(one);
             log.info(orderId + "订单取消成功，已支付金额返还");
         }
         map.put("code", 0);

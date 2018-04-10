@@ -187,7 +187,7 @@ public class ServiceApi {
        return Result.success(expressUserService.checkIsPickUp(userComponent.getLoginUser().getId()));
     }
 
-    @GetMapping("getOrderDetailById2/v1")
+    @GetMapping("/getOrderDetailById2/v1")
     public Result<ExpressDetailVO> getOrderDetailById(Integer orderId){
         if(orderId == null){
             return Result.error("error","请传入订单号");

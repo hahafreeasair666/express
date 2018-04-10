@@ -44,8 +44,9 @@ public class ExpressApplicationTests {
 		//userWalletBORepository.save(new UserWalletBO(1));
 		//erWalletBORepository.deleteAll();
 		UserWalletBO one = new UserWalletBO();
-		one.setBalance(100.0);
-		one.setIntegral(99999);
+		one.setUserId(4);
+		one.setBalance(10.0);
+		one.setIntegral(0);
 		one.setCreditNum(100);
 		userWalletBORepository.save(one);	}
 
