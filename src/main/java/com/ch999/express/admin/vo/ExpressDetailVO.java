@@ -19,4 +19,6 @@ public class ExpressDetailVO {
     private Map<String,Object> expressInfo;
 
     private Map<String,Object> employeeInfo;
+
+    private Boolean isCanConfirm = false;
 }

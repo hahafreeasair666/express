@@ -4,6 +4,7 @@ import com.ch999.express.admin.entity.UserInfo;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -15,5 +16,10 @@ import java.util.List;
  */
 public interface UserInfoMapper extends BaseMapper<UserInfo> {
 
-    List<UserInfo> test();
+    /**
+     * 个人中心
+     * @param userId
+     * @return
+     */
+    Map<String,Object> selectCenterInfo(Integer userId);
 }

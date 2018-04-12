@@ -12,4 +12,41 @@
         <result column="del_flag" property="delFlag" />
     </resultMap>
 
+    <select id="getOrderList" resultMap="BaseResultMap">
+        select * from express_order where handle_state = 1
+        <if test=" userId != null">
+            and create_user = #{userId}
+        </if>
+    </select>
+
+    <select id="getUserOrderList" resultMap="BaseResultMap">
+        select id,handle_state,express_info from express_order where create_user = #{userId} and del_flag = 0
+    </select>
+
+    <select id="selectUserPickUp" resultType="com.ch999.express.admin.vo.UserPickUpVO">
+SELECT
+eo.id as orderId,
+eo.express_info as expressInfo,
+eu.userId,
+case
+when
+eu.complete_flag = 0
+then '未完成'
+else '已完成'
+end as completeFlag
+from
+express_order eo
+left join
+(
+SELECT
+	express_order_id,
+	userId,
+  complete_flag
+FROM
+	express_user
+WHERE
+	userId = #{userId}
+	AND del_flag = 0
+) eu on eo.id = eu.express_order_id where userId is not null
+    </select>
 </mapper>

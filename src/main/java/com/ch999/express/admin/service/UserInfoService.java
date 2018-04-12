@@ -2,6 +2,7 @@ package com.ch999.express.admin.service;
 
 import com.ch999.express.admin.entity.UserInfo;
 import com.baomidou.mybatisplus.service.IService;
+import com.ch999.express.admin.vo.CenterVO;
 
 /**
  * <p>
@@ -29,4 +30,11 @@ public interface UserInfoService extends IService<UserInfo> {
      * @return
      */
     Boolean insertUser(String userName,String pwd,String mobile);
+
+    /**
+     * 获取个人中心信息
+     * @param userId
+     * @return
+     */
+    CenterVO getCenterInfo(Integer userId,UserInfo userInfo);
 }

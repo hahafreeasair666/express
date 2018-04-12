@@ -2,17 +2,20 @@ package com.ch999.express.admin.api;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.ch999.common.util.excel.ExcelImport;
 import com.ch999.common.util.vo.Result;
 import com.ch999.express.admin.component.UserComponent;
 import com.ch999.express.admin.document.UserWalletBO;
+import com.ch999.express.admin.entity.ExpressOrder;
 import com.ch999.express.admin.entity.UserAuthentication;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.repository.UserWalletBORepository;
 import com.ch999.express.admin.service.AddressService;
+import com.ch999.express.admin.service.ExpressOrderService;
 import com.ch999.express.admin.service.UserAuthenticationService;
-import com.ch999.express.admin.vo.AddUpdateAddressVO;
-import com.ch999.express.admin.vo.AuthenticationVO;
+import com.ch999.express.admin.service.UserInfoService;
+import com.ch999.express.admin.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,25 +48,31 @@ public class UserApi {
     @Resource
     private UserWalletBORepository userWalletBORepository;
 
+    @Resource
+    private UserInfoService userInfoService;
+
+    @Resource
+    private ExpressOrderService expressOrderService;
+
     //认证
 
     @PostMapping("/Authentication/v1")
     public Result<String> Authentication(@Valid AuthenticationVO authenticationVO) {
         if (authenticationVO.getIdPic().split(",").length != 2) {
-            return Result.error("error","请传入身份证正反面照片");
+            return Result.error("error", "请传入身份证正反面照片");
         }
         UserInfo loginUser = userComponent.getLoginUser();
-        if(userAuthenticationService.selectOne(new EntityWrapper<UserAuthentication>().eq("user_id",loginUser.getId())) != null){
-            return Result.error("error","您已认证过无需重复认证");
+        if (userAuthenticationService.selectOne(new EntityWrapper<UserAuthentication>().eq("user_id", loginUser.getId())) != null) {
+            return Result.error("error", "您已认证过无需重复认证");
         }
         Boolean aBoolean = userAuthenticationService.userAuthentication(loginUser, authenticationVO);
-        if(aBoolean){
+        if (aBoolean) {
             //认证成功后进行钱包初始化
             userWalletBORepository.save(new UserWalletBO(loginUser.getId()));
             log.info("用户：" + loginUser.getUserName() + "认证成功 钱包初始化");
             return Result.success();
         }
-        return Result.error("error","认证失败");
+        return Result.error("error", "认证失败");
     }
 
 
@@ -105,12 +114,35 @@ public class UserApi {
         }
         return Result.success();
     }
-    //个人中心
+    //个人中心（积分，余额，信用分，下的订单，接的订单）
+
+    @GetMapping("/getCenterInfo/v1")
+    public Result<CenterVO> getCenterInfo(Integer userId) {
+        return Result.success(userInfoService.getCenterInfo(userId, userComponent.getLoginUser()));
+    }
 
     //发布列表
 
+    @GetMapping("/getUserOrderList/v1")
+    public Result<PageVO<UserOrderVO>> getUserOrderList(Page<UserOrderVO> page) {
+        PageVO<UserOrderVO> pageVO = new PageVO();
+        Page<UserOrderVO> userOrderList = expressOrderService.getUserOrderList(page, userComponent.getLoginUser().getId());
+        pageVO.setList(userOrderList.getRecords());
+        pageVO.setCurrentPage(page.getCurrent());
+        pageVO.setTotalPage((int) Math.ceil(page.getTotal() / (double) page.getSize()));
+        return Result.success(pageVO);
+    }
     //取件列表
 
+    @GetMapping("/getUserPickUpList/v1")
+    public Result<PageVO<UserPickUpVO>> getUserPickUpList(Page<UserPickUpVO> page) {
+        PageVO<UserPickUpVO> pageVO = new PageVO();
+        Page<UserPickUpVO> userPickUpList = expressOrderService.getUserPickUpList(page, 4);
+        pageVO.setList(userPickUpList.getRecords());
+        pageVO.setCurrentPage(page.getCurrent());
+        pageVO.setTotalPage((int) Math.ceil(page.getTotal() / (double) page.getSize()));
+        return Result.success(pageVO);
+    }
     //从发布，取件点进去看评价，进行中的单要查看距离
 
 

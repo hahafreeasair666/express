@@ -1,6 +1,7 @@
 package com.ch999.express.admin.api;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.ch999.common.util.vo.Result;
 import com.ch999.express.admin.component.ExpressComponent;
 import com.ch999.express.admin.component.UserComponent;
@@ -14,6 +15,7 @@ import com.ch999.express.admin.service.UserAuthenticationService;
 import com.ch999.express.admin.vo.ExpressDetailVO;
 import com.ch999.express.admin.vo.ExpressListVO;
 import com.ch999.express.admin.vo.ExpressVO;
+import com.ch999.express.admin.vo.PageVO;
 import com.ch999.express.common.MapTools;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -126,11 +128,16 @@ public class ServiceApi {
     //接代取(获取当前接件这position，返回离快递点距离，收货地址距离，所需时间等信息)
 
     @GetMapping("/getExpressList/v1")
-    public Result<List<ExpressListVO>> getExpressList(String position, Boolean sortByPrice, Boolean sortByDistance1, Boolean sortByDistance2) {
+    public Result<PageVO<ExpressListVO>> getExpressList(Page<ExpressListVO> page,String position, Boolean sortByPrice, Boolean sortByDistance1, Boolean sortByDistance2, Integer userId) {
         if (StringUtils.isBlank(position)) {
             return Result.error("error", "请允许获取地理位置再使用本功能");
         }
-        return Result.success(expressOrderService.getExpressList(position, sortByPrice == null ? false : sortByPrice, sortByDistance1 == null ? false : sortByDistance1, sortByDistance2 == null ? false : sortByDistance2));
+        Page<ExpressListVO> expressList = expressOrderService.getExpressList(page, position, sortByPrice == null ? false : sortByPrice, sortByDistance1 == null ? false : sortByDistance1, sortByDistance2 == null ? false : sortByDistance2, userId);
+        PageVO<ExpressListVO> pageVO = new PageVO<>();
+        pageVO.setList(expressList.getRecords());
+        pageVO.setCurrentPage(page.getCurrent());
+        pageVO.setTotalPage((int) Math.ceil(page.getTotal() / (double) page.getSize()));
+        return Result.success(pageVO);
     }
 
     @PostMapping("/addPickUp/v1")

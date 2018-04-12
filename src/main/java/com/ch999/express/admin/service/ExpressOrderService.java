@@ -1,9 +1,9 @@
 package com.ch999.express.admin.service;
 
+import com.baomidou.mybatisplus.plugins.Page;
 import com.ch999.express.admin.entity.ExpressOrder;
 import com.baomidou.mybatisplus.service.IService;
-import com.ch999.express.admin.vo.ExpressDetailVO;
-import com.ch999.express.admin.vo.ExpressListVO;
+import com.ch999.express.admin.vo.*;
 
 import java.util.List;
 import java.util.Map;
@@ -49,7 +49,7 @@ public interface ExpressOrderService extends IService<ExpressOrder> {
      * @param position
      * @return
      */
-    List<ExpressListVO> getExpressList(String position,Boolean sortByPrice,Boolean sortByDistance1,Boolean sortByDistance2);
+    Page<ExpressListVO> getExpressList(Page<ExpressListVO> page,String position,Boolean sortByPrice,Boolean sortByDistance1,Boolean sortByDistance2,Integer userId);
 
     /**
      * 根据订单id获取订单详情,接单者版
@@ -67,4 +67,18 @@ public interface ExpressOrderService extends IService<ExpressOrder> {
      * @return
      */
     ExpressDetailVO getOrderDetailById(Integer userId,Integer orderId);
+
+    /**
+     * 个人中心的订单列表
+     * @param userId
+     * @return
+     */
+    Page<UserOrderVO> getUserOrderList(Page<UserOrderVO> page, Integer userId);
+
+    /**
+     * 个人中心代取列表
+     * @param userId
+     * @return
+     */
+    Page<UserPickUpVO> getUserPickUpList(Page<UserPickUpVO> page, Integer userId);
 }

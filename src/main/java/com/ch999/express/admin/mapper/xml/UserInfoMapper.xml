@@ -15,8 +15,25 @@
         <result column="del_flag" property="delFlag" />
     </resultMap>
 
-    <select id="test" resultMap="BaseResultMap">
-        SELECT * from user_info
+    <select id="selectCenterInfo" resultType="map">
+       SELECT
+	u.id,
+CASE
+	WHEN t.orderNum is NULL
+	THEN
+	0 ELSE t.orderNum
+	END AS orderNum,
+CASE
+	WHEN k.pickUpNum is NULL
+	THEN
+	0 ELSE k.pickUpNum
+	END AS pickUpNum
+FROM
+	user_info u
+	LEFT JOIN ( SELECT count( 1 ) AS orderNum, eo.create_user FROM express_order eo WHERE eo.create_user = #{userId} and eo.del_flag = 0 ) t ON t.create_user = u.id
+	LEFT JOIN ( SELECT COUNT( 1 ) AS pickUpNum, eu.userId FROM express_user eu WHERE eu.userId = #{userId} and eu.del_flag = 0) k ON k.userId = u.id
+WHERE
+	u.id = #{userId}
     </select>
 
 </mapper>

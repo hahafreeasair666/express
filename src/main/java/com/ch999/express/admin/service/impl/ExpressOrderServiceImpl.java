@@ -2,6 +2,7 @@ package com.ch999.express.admin.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.ch999.express.admin.document.UserWalletBO;
 import com.ch999.express.admin.entity.Address;
 import com.ch999.express.admin.entity.ExpressOrder;
@@ -14,8 +15,7 @@ import com.ch999.express.admin.service.ExpressOrderService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.ch999.express.admin.service.ExpressUserService;
 import com.ch999.express.admin.service.UserInfoService;
-import com.ch999.express.admin.vo.ExpressDetailVO;
-import com.ch999.express.admin.vo.ExpressListVO;
+import com.ch999.express.admin.vo.*;
 import com.ch999.express.common.MapTools;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,6 +48,9 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
 
     @Resource
     private UserInfoService userInfoService;
+
+    @Resource
+    private ExpressOrderMapper expressOrderMapper;
 
     @Override
     public Map<String, Object> addExpressOrder(Integer userId, Integer addressId, ExpressOrder.ExpressInfo expressInfo) {
@@ -151,9 +154,9 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     }
 
     @Override
-    public List<ExpressListVO> getExpressList(String position, Boolean sortByPrice, Boolean sortByDistance1, Boolean sortByDistance2) {
+    public Page<ExpressListVO> getExpressList(Page<ExpressListVO> page,String position, Boolean sortByPrice, Boolean sortByDistance1, Boolean sortByDistance2,Integer userId) {
         List<ExpressListVO> listVOS = new ArrayList<>();
-        this.selectList(new EntityWrapper<ExpressOrder>().eq("handle_state", 1)).forEach(li -> {
+        expressOrderMapper.getOrderList(page,userId).forEach(li->{
             ExpressListVO expressListVO = assembleExpressInfo(position, li, false);
             if (expressListVO != null) {
                 listVOS.add(expressListVO);
@@ -168,7 +171,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         } else if (sortByPrice) {
             listVOS2 = listVOS.stream().sorted(Comparator.comparing(ExpressListVO::getPrice, Comparator.reverseOrder())).collect(Collectors.toList());
         }
-        return CollectionUtils.isNotEmpty(listVOS2) ? listVOS2 : listVOS;
+        return CollectionUtils.isNotEmpty(listVOS2) ? page.setRecords(listVOS2) : page.setRecords(listVOS);
     }
 
     @Override
@@ -213,6 +216,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
                 employeeInfo.put("mobile",userInfo.getMobile());
                 Integer distanceByPosition = MapTools.getDistanceByPosition(expressUser.getPosition(), addressInfoVO.getPosition());
                 employeeInfo.put("distance","代取快递的人距离您" + distanceByPosition +"米");
+                expressDetailVO.setIsCanConfirm(true);
             }
             ExpressOrder.ExpressInfo expressInfo1 = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
             expressInfo.put("expressName",expressInfo1.getExpressName());
@@ -224,6 +228,27 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             expressInfo.put("code",expressInfo1.getCode());
             return expressDetailVO;
         }
+    }
+
+    @Override
+    public Page<UserOrderVO> getUserOrderList(Page<UserOrderVO> page, Integer userId) {
+        List<UserOrderVO> list = new ArrayList<>();
+        expressOrderMapper.getUserOrderList(page,userId).forEach(li->{
+            UserOrderVO map = new UserOrderVO();
+            map.setOrderId(li.getId());
+            map.setState(getHandleStateInfo(li.getHandleState()));
+            ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(li.getExpressInfo(), ExpressOrder.ExpressInfo.class);
+            map.setExpressPoint(expressInfo.getExpressName());
+            list.add(map);
+        });
+        page.setRecords(list);
+        return page;
+    }
+
+    @Override
+    public Page<UserPickUpVO> getUserPickUpList(Page<UserPickUpVO> page, Integer userId) {
+        List<UserPickUpVO> userPickUpVOS = expressOrderMapper.selectUserPickUp(page, userId);
+        return page.setRecords(userPickUpVOS);
     }
 
     private Double handlePrice(Integer weight, Integer distance, Double tip) {
@@ -285,5 +310,15 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             return expressListVO;
         }
         return null;
+    }
+
+    private String getHandleStateInfo(Integer integer){
+        switch (integer){
+            case 0: return "未付款";
+            case 1: return "已付款";
+            case 2: return "已接单";
+            case 3: return "已完成";
+            default: return "未知";
+        }
     }
 }
