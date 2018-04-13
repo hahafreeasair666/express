@@ -1,5 +1,6 @@
 package com.ch999.express.admin.vo;
 
+import com.ch999.express.admin.entity.ExpressComment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,4 +28,6 @@ public class ExpressListVO {
     private Double price;
 
     private Map<String,Object> distanceInfo;
+
+    private ExpressComment commentInfo;
 }

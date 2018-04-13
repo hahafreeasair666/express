@@ -1,5 +1,6 @@
 package com.ch999.express.admin.vo;
 
+import com.ch999.express.admin.entity.ExpressComment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,4 +22,6 @@ public class ExpressDetailVO {
     private Map<String,Object> employeeInfo;
 
     private Integer state;
+
+    private ExpressComment commentInfo;
 }

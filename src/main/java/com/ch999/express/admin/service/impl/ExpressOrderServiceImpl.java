@@ -50,6 +50,9 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     @Resource
     private DetailedLogService detailedLogService;
 
+    @Resource
+    private ExpressCommentService expressCommentService;
+
     @Override
     public Map<String, Object> addExpressOrder(Integer userId, Integer addressId, ExpressOrder.ExpressInfo expressInfo) {
         //先验算距离，收货地址到快递点超过10km不让发布
@@ -164,7 +167,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     public Page<ExpressListVO> getExpressList(Page<ExpressListVO> page,String position, Boolean sortByPrice, Boolean sortByDistance1, Boolean sortByDistance2,Integer userId) {
         List<ExpressListVO> listVOS = new ArrayList<>();
         expressOrderMapper.getOrderList(page,userId).forEach(li->{
-            ExpressListVO expressListVO = assembleExpressInfo(position, li, false);
+            ExpressListVO expressListVO = assembleExpressInfo(position, li, false,null);
             if (expressListVO != null) {
                 listVOS.add(expressListVO);
             }
@@ -189,7 +192,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         }
         ExpressOrder expressOrder = this.selectById(orderId);
         if (expressOrder != null) {
-            ExpressListVO expressListVO = assembleExpressInfo(position, expressOrder, true);
+            ExpressListVO expressListVO = assembleExpressInfo(position, expressOrder, true,expressUser);
             return expressListVO;
         }
         return new ExpressListVO();
@@ -233,6 +236,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             expressInfo.put("weight",getWeight(expressInfo1.getWeight()));
             expressInfo.put("code",expressInfo1.getCode());
             expressDetailVO.setState(expressOrder.getHandleState());
+            expressDetailVO.setCommentInfo(expressCommentService.selectOne(new EntityWrapper<ExpressComment>().eq("express_order_id",orderId)));
             return expressDetailVO;
         }
     }
@@ -316,7 +320,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         }
     }
 
-    private ExpressListVO assembleExpressInfo(String position, ExpressOrder li, Boolean isGetDetail) {
+    private ExpressListVO assembleExpressInfo(String position, ExpressOrder li, Boolean isGetDetail,ExpressUser expressUser) {
         ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(li.getExpressInfo(), ExpressOrder.ExpressInfo.class);
         Integer distance = MapTools.getDistanceByPosition(expressInfo.getPosition(), position);
         if (distance < 5000 && distance > 0) {
@@ -335,6 +339,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
                 liExpressInfo.put("expressMobile", expressInfo.getExpressMobile());
                 liExpressInfo.put("expressMsg", expressInfo.getExpressMsg());
                 liExpressInfo.put("code", expressInfo.getCode());
+                expressListVO.setCommentInfo(expressCommentService.selectOne(new EntityWrapper<ExpressComment>().eq("express_order_id",li.getId())));
             }
             employerInfo.put("employAddress", addressInfo.get("address"));
             liExpressInfo.put("expressName", expressInfo.getExpressName());
@@ -348,6 +353,14 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             distanceInfo.put("tips2", "从快递点到收货点步行需要" + Math.ceil(distance2 / MapTools.AVGWALKSPEED) + "分钟");
             expressListVO.setCreateTime(li.getCreateTime());
             expressListVO.setCreateAvatar(userInfoService.selectById(li.getCreateUser()).getAvatar());
+            if(expressUser != null){
+                expressListVO.setCommentInfo(expressCommentService.selectOne(new EntityWrapper<ExpressComment>().eq("express_order_id",li.getId())));
+                if(expressUser.getCompleteFlag()){
+                    distanceInfo = new HashMap<>(1);
+                    distanceInfo.put("tips1","订单已完成");
+                    expressListVO.setDistanceInfo(distanceInfo);
+                }
+            }
             return expressListVO;
         }
         return null;

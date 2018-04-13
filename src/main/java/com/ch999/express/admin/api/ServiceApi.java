@@ -170,7 +170,7 @@ public class ServiceApi {
         if(StringUtils.isBlank(position)){
             return Result.error("error","请允许获取手机位置后再来查看");
         }
-        ExpressListVO orderDetailById = expressOrderService.getOrderDetailById(position, userComponent.getLoginUser().getId(), orderId);
+        ExpressListVO orderDetailById = expressOrderService.getOrderDetailById(position, 4, orderId);
         if(orderDetailById == null){
             return Result.error("error","改订单不是您的，无权查看详细信息");
         }else if(orderDetailById.getOrderId() == null){
