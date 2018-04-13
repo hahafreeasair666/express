@@ -34,7 +34,7 @@ public interface ExpressOrderService extends IService<ExpressOrder> {
      * @param price
      * @return
      */
-    Map<String,Object> orderPayment(Integer userId,Integer orderId,Double price);
+    Map<String,Object> orderPayment(Integer userId,Integer orderId,Double price,Integer integral);
 
     /**
      * 取消订单
@@ -70,15 +70,27 @@ public interface ExpressOrderService extends IService<ExpressOrder> {
 
     /**
      * 个人中心的订单列表
+     * @param page
      * @param userId
+     * @param state
      * @return
      */
-    Page<UserOrderVO> getUserOrderList(Page<UserOrderVO> page, Integer userId);
+    Page<UserOrderVO> getUserOrderList(Page<UserOrderVO> page, Integer userId,Integer state);
 
     /**
      * 个人中心代取列表
+     * @param page
      * @param userId
+     * @param state
      * @return
      */
-    Page<UserPickUpVO> getUserPickUpList(Page<UserPickUpVO> page, Integer userId);
+    Page<UserPickUpVO> getUserPickUpList(Page<UserPickUpVO> page, Integer userId,Integer state);
+
+    /**
+     * 确认收货订单
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    Map<String,Object> confirmOrder(Integer userId,Integer orderId);
 }

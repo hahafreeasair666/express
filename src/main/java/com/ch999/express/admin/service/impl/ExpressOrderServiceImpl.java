@@ -4,22 +4,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.ch999.express.admin.document.UserWalletBO;
-import com.ch999.express.admin.entity.Address;
-import com.ch999.express.admin.entity.ExpressOrder;
-import com.ch999.express.admin.entity.ExpressUser;
-import com.ch999.express.admin.entity.UserInfo;
+import com.ch999.express.admin.entity.*;
 import com.ch999.express.admin.mapper.ExpressOrderMapper;
 import com.ch999.express.admin.repository.UserWalletBORepository;
-import com.ch999.express.admin.service.AddressService;
-import com.ch999.express.admin.service.ExpressOrderService;
+import com.ch999.express.admin.service.*;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.ch999.express.admin.service.ExpressUserService;
-import com.ch999.express.admin.service.UserInfoService;
 import com.ch999.express.admin.vo.*;
 import com.ch999.express.common.MapTools;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -52,6 +47,9 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     @Resource
     private ExpressOrderMapper expressOrderMapper;
 
+    @Resource
+    private DetailedLogService detailedLogService;
+
     @Override
     public Map<String, Object> addExpressOrder(Integer userId, Integer addressId, ExpressOrder.ExpressInfo expressInfo) {
         //先验算距离，收货地址到快递点超过10km不让发布
@@ -81,7 +79,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     }
 
     @Override
-    public Map<String, Object> orderPayment(Integer userId, Integer orderId, Double price) {
+    public Map<String, Object> orderPayment(Integer userId, Integer orderId, Double price,Integer integral) {
         Map<String, Object> map = new HashMap<>();
         //校验订单是否已经支付
         ExpressOrder expressOrder = this.selectById(orderId);
@@ -106,17 +104,24 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             map.put("code", 5000);
             map.put("msg", "您还未进行认证，无法完成支付");
             return map;
-        } else if (one.getBalance() < price) {
+        } else if (one.getBalance() + integral/100.0 < price) {
             map.put("code", 5000);
             map.put("msg", "余额不足，请充值后再进行支付");
             return map;
         } else {
             map.put("code", 0);
-            map.put("msg", "支付成功，本次支付：" + price + "元，余额：" + (one.getBalance() - price) + "元,获得：" + price.intValue() + "积分");
+            map.put("msg", "支付成功，本次支付：" + price + "元，余额：" + (one.getBalance() - price + integral/100.0) + "元,获得：" + (price.intValue() - (int)Math.ceil(integral/100.0)) + "积分");
             one.setBalance(one.getBalance() - price);
-            one.setIntegral(one.getIntegral() + price.intValue());
+            one.setIntegral(one.getIntegral() + price.intValue() - integral);
             userWalletBORepository.save(one);
             expressOrder.setHandleState(1);
+            detailedLogService.insert(new DetailedLog(userId,1,"下单：余额 -"+price+"元"));
+            if(integral > 0){
+                detailedLogService.insert(new DetailedLog(userId,2,"使用积分付款：积分 -"+integral+"分"));
+            }
+            if(price > integral/100.0){
+                detailedLogService.insert(new DetailedLog(userId,2,"下单：积分 +"+(price.intValue() - (int)Math.ceil(integral/100.0))+"分"));
+            }
             this.updateById(expressOrder);
             log.info(userId + "：下单成功，余额积分已处理");
             return map;
@@ -142,6 +147,8 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             one.setIntegral(one.getIntegral() - expressInfo.getPrice().intValue());
             userWalletBORepository.save(one);
             log.info(orderId + "订单取消成功，已支付金额返还");
+            detailedLogService.insert(new DetailedLog(userId,1,"取消订单：余额 +"+expressInfo.getPrice()+"元"));
+            detailedLogService.insert(new DetailedLog(userId,2,"取消订单：积分 -"+expressInfo.getPrice().intValue()+"分"));
         }
         map.put("code", 0);
         if (expressOrder.getHandleState() == 1) {
@@ -216,7 +223,6 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
                 employeeInfo.put("mobile",userInfo.getMobile());
                 Integer distanceByPosition = MapTools.getDistanceByPosition(expressUser.getPosition(), addressInfoVO.getPosition());
                 employeeInfo.put("distance","代取快递的人距离您" + distanceByPosition +"米");
-                expressDetailVO.setIsCanConfirm(true);
             }
             ExpressOrder.ExpressInfo expressInfo1 = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
             expressInfo.put("expressName",expressInfo1.getExpressName());
@@ -226,17 +232,18 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             expressInfo.put("price",expressInfo1.getPrice());
             expressInfo.put("weight",getWeight(expressInfo1.getWeight()));
             expressInfo.put("code",expressInfo1.getCode());
+            expressDetailVO.setState(expressOrder.getHandleState());
             return expressDetailVO;
         }
     }
 
     @Override
-    public Page<UserOrderVO> getUserOrderList(Page<UserOrderVO> page, Integer userId) {
+    public Page<UserOrderVO> getUserOrderList(Page<UserOrderVO> page, Integer userId,Integer state) {
         List<UserOrderVO> list = new ArrayList<>();
-        expressOrderMapper.getUserOrderList(page,userId).forEach(li->{
+        expressOrderMapper.getUserOrderList(page,userId,state).forEach(li->{
             UserOrderVO map = new UserOrderVO();
             map.setOrderId(li.getId());
-            map.setState(getHandleStateInfo(li.getHandleState()));
+            map.setState(li.getHandleState());
             ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(li.getExpressInfo(), ExpressOrder.ExpressInfo.class);
             map.setExpressPoint(expressInfo.getExpressName());
             list.add(map);
@@ -246,9 +253,41 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     }
 
     @Override
-    public Page<UserPickUpVO> getUserPickUpList(Page<UserPickUpVO> page, Integer userId) {
-        List<UserPickUpVO> userPickUpVOS = expressOrderMapper.selectUserPickUp(page, userId);
+    public Page<UserPickUpVO> getUserPickUpList(Page<UserPickUpVO> page, Integer userId,Integer state) {
+        List<UserPickUpVO> userPickUpVOS = expressOrderMapper.selectUserPickUp(page, userId,state);
         return page.setRecords(userPickUpVOS);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> confirmOrder(Integer userId, Integer orderId) {
+        Map<String, Object> map = new HashMap<>();
+        ExpressOrder expressOrder = this.selectById(orderId);
+        if(!userId.equals(expressOrder.getCreateUser())){
+            map.put("code",5000);
+            map.put("msg","只能确认自己的订单");
+            return map;
+        }else if(expressOrder.getHandleState() != 2){
+            map.put("code",5000);
+            map.put("msg","订单为不可确认状态");
+            return map;
+        }else {
+            expressOrder.setHandleState(3);
+            ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
+            this.updateById(expressOrder);
+            ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId).eq("complete_flag", 0));
+            expressUser.setCompleteFlag(true);
+            expressUserService.updateById(expressUser);
+            UserWalletBO one = userWalletBORepository.findOne(expressUser.getUserId());
+            one.setBalance(one.getBalance() + expressInfo.getPrice());
+            one.setIntegral(one.getIntegral() + (int)Math.ceil(expressInfo.getPrice()/2));
+            userWalletBORepository.save(one);
+            map.put("code",0);
+            map.put("msg","订单确认收货成功，钱款已打到对方账户");
+            detailedLogService.insert(new DetailedLog(expressUser.getUserId(),1,"确认订单：余额 +"+expressInfo.getPrice()+"元"));
+            detailedLogService.insert(new DetailedLog(expressUser.getUserId(),2,"确认订单：积分 +"+((int)Math.ceil(expressInfo.getPrice()/2)+"分")));
+            return map;
+        }
     }
 
     private Double handlePrice(Integer weight, Integer distance, Double tip) {
@@ -307,6 +346,8 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             Integer distance2 = MapTools.getDistanceByPosition(expressInfo.getPosition(), addressInfo.get("position").toString());
             distanceInfo.put("distance2", distance2 + "米");
             distanceInfo.put("tips2", "从快递点到收货点步行需要" + Math.ceil(distance2 / MapTools.AVGWALKSPEED) + "分钟");
+            expressListVO.setCreateTime(li.getCreateTime());
+            expressListVO.setCreateAvatar(userInfoService.selectById(li.getCreateUser()).getAvatar());
             return expressListVO;
         }
         return null;
@@ -318,7 +359,9 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             case 1: return "已付款";
             case 2: return "已接单";
             case 3: return "已完成";
+            case 4: return "已评价";
             default: return "未知";
         }
     }
+
 }

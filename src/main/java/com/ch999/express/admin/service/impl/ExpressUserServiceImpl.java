@@ -63,11 +63,11 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
             UserWalletBO one = userWalletBORepository.findOne(userId);
             if(one.getCreditNum() < 90){
                 map.put("code",5000);
-                map.put("msg","您被用户投诉太多次，暂时不能接单，请联系开发人员整改后再接单");
+                map.put("msg","您的信用分过低，暂时不能接单，请联系开发人员整改后再接单");
                 return map;
             }
             List<ExpressUser> expressUsers = this.selectList(new EntityWrapper<ExpressUser>().eq("userId", userId).eq("complete_flag", 0));
-            if(expressUsers.size() > 2){
+            if(expressUsers.size() > 3){
                 map.put("code",5000);
                 map.put("msg","抱歉一次最多只能接3单，完成了再来接吧");
                 return map;

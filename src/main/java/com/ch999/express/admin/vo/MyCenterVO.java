@@ -3,6 +3,8 @@ package com.ch999.express.admin.vo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * @author hahalala
  */
@@ -14,8 +16,8 @@ public class MyCenterVO  extends  CenterVO {
 
     private Integer myIntegral;
 
-    private String myOrder;
+    private Map<String,Object> myOrder;
 
-    private String myPickUp;
+    private Map<String,Object> myPickUp;
 
 }

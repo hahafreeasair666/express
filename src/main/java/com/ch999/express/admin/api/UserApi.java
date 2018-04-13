@@ -7,16 +7,15 @@ import com.ch999.common.util.excel.ExcelImport;
 import com.ch999.common.util.vo.Result;
 import com.ch999.express.admin.component.UserComponent;
 import com.ch999.express.admin.document.UserWalletBO;
+import com.ch999.express.admin.entity.DetailedLog;
 import com.ch999.express.admin.entity.ExpressOrder;
 import com.ch999.express.admin.entity.UserAuthentication;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.repository.UserWalletBORepository;
-import com.ch999.express.admin.service.AddressService;
-import com.ch999.express.admin.service.ExpressOrderService;
-import com.ch999.express.admin.service.UserAuthenticationService;
-import com.ch999.express.admin.service.UserInfoService;
+import com.ch999.express.admin.service.*;
 import com.ch999.express.admin.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +54,12 @@ public class UserApi {
     @Resource
     private ExpressOrderService expressOrderService;
 
+    @Resource
+    private DetailedLogService detailedLogService;
+
+    @Resource
+    private ExpressCommentService expressCommentService;
+
     //认证
 
     @PostMapping("/Authentication/v1")
@@ -70,6 +76,9 @@ public class UserApi {
             //认证成功后进行钱包初始化
             userWalletBORepository.save(new UserWalletBO(loginUser.getId()));
             log.info("用户：" + loginUser.getUserName() + "认证成功 钱包初始化");
+            detailedLogService.insert(new DetailedLog(loginUser.getId(), 1, "余额初始化0.0元"));
+            detailedLogService.insert(new DetailedLog(loginUser.getId(), 2, "积分初始化0积分"));
+            detailedLogService.insert(new DetailedLog(loginUser.getId(), 3, "信用分初始化100分"));
             return Result.success();
         }
         return Result.error("error", "认证失败");
@@ -124,9 +133,9 @@ public class UserApi {
     //发布列表
 
     @GetMapping("/getUserOrderList/v1")
-    public Result<PageVO<UserOrderVO>> getUserOrderList(Page<UserOrderVO> page) {
+    public Result<PageVO<UserOrderVO>> getUserOrderList(Page<UserOrderVO> page, Integer state) {
         PageVO<UserOrderVO> pageVO = new PageVO();
-        Page<UserOrderVO> userOrderList = expressOrderService.getUserOrderList(page, userComponent.getLoginUser().getId());
+        Page<UserOrderVO> userOrderList = expressOrderService.getUserOrderList(page, userComponent.getLoginUser().getId(), state);
         pageVO.setList(userOrderList.getRecords());
         pageVO.setCurrentPage(page.getCurrent());
         pageVO.setTotalPage((int) Math.ceil(page.getTotal() / (double) page.getSize()));
@@ -135,15 +144,67 @@ public class UserApi {
     //取件列表
 
     @GetMapping("/getUserPickUpList/v1")
-    public Result<PageVO<UserPickUpVO>> getUserPickUpList(Page<UserPickUpVO> page) {
+    public Result<PageVO<UserPickUpVO>> getUserPickUpList(Page<UserPickUpVO> page, Integer state) {
         PageVO<UserPickUpVO> pageVO = new PageVO();
-        Page<UserPickUpVO> userPickUpList = expressOrderService.getUserPickUpList(page, 4);
+        Page<UserPickUpVO> userPickUpList = expressOrderService.getUserPickUpList(page, userComponent.getLoginUser().getId(), state);
         pageVO.setList(userPickUpList.getRecords());
         pageVO.setCurrentPage(page.getCurrent());
         pageVO.setTotalPage((int) Math.ceil(page.getTotal() / (double) page.getSize()));
         return Result.success(pageVO);
     }
-    //从发布，取件点进去看评价，进行中的单要查看距离
+    //确认收货
 
+    @PostMapping("/confirmOrder/v1")
+    public Result<String> confirmOrder(Integer orderId) {
+        Map<String, Object> map = expressOrderService.confirmOrder(userComponent.getLoginUser().getId(), orderId);
+        if ((int) map.get("code") != 0) {
+            return Result.error("error", map.get("msg").toString());
+        }
+        return Result.success("success", map.get("msg").toString(), null);
+    }
+
+    //评价
+
+    @PostMapping("/addComment/v1")
+    public Result<String> addComment(Integer orderId,Integer star,String comment){
+        if(orderId == null){
+            return Result.error("error","请传入订单号");
+        }
+        if(star == null){
+            return Result.error("error","请传入评分");
+        }
+        if(StringUtils.isBlank(comment)){
+            return Result.error("error","请传入评论内容");
+        }
+        Map<String, Object> map = expressCommentService.addComment(orderId, userComponent.getLoginUser().getId(), star, comment);
+        if((int)map.get("code") != 0){
+            return Result.error("error",map.get("msg").toString());
+        }
+        return Result.success("success",map.get("msg").toString(),null);
+    }
+
+
+    //查看余额，积分，信用分明细
+
+    @GetMapping("/getDetailLog/v1")
+    public Result<List<DetailedLog>> getDetailLog(Integer type) {
+        return Result.success(detailedLogService.selectList(new EntityWrapper<DetailedLog>().eq("user_id", 4)
+                .eq("log_type", type)));
+    }
+
+    //获取最大可用积分数量
+
+    @GetMapping("/getCanUserIntegral/v1")
+    public Result<Map<String, Object>> getCanUserIntegral(Double price) {
+        if (price == null) {
+            return Result.error("error", "请传入订单价格");
+        }
+        UserWalletBO one = userWalletBORepository.findOne(userComponent.getLoginUser().getId());
+        Map<String, Object> map = new HashMap<>(2);
+        double integral = price * 100;
+        map.put("ownedIntegral", one.getIntegral());
+        map.put("canUseIntegral", one.getIntegral() < (int) integral ? one.getIntegral() : (int) integral);
+        return Result.success(map);
+    }
 
 }

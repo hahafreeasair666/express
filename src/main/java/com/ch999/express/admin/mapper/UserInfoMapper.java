@@ -2,6 +2,7 @@ package com.ch999.express.admin.mapper;
 
 import com.ch999.express.admin.entity.UserInfo;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.ch999.express.admin.vo.CenterInfoMapperVO;
 
 import java.util.List;
 import java.util.Map;
@@ -21,5 +22,5 @@ public interface UserInfoMapper extends BaseMapper<UserInfo> {
      * @param userId
      * @return
      */
-    Map<String,Object> selectCenterInfo(Integer userId);
+    CenterInfoMapperVO selectCenterInfo(Integer userId);
 }

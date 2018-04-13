@@ -15,25 +15,24 @@
         <result column="del_flag" property="delFlag" />
     </resultMap>
 
-    <select id="selectCenterInfo" resultType="map">
-       SELECT
-	u.id,
-CASE
-	WHEN t.orderNum is NULL
-	THEN
-	0 ELSE t.orderNum
-	END AS orderNum,
-CASE
-	WHEN k.pickUpNum is NULL
-	THEN
-	0 ELSE k.pickUpNum
-	END AS pickUpNum
+    <select id="selectCenterInfo" resultType="com.ch999.express.admin.vo.CenterInfoMapperVO">
+     SELECT
+	np.userId,
+	np.notPay,
+	noo.noOrder,
+	ts.transport,
+	nc.notComment,
+	c.complete as complete1,
+	euc.noComplete,
+	ec.complete as complete2
 FROM
-	user_info u
-	LEFT JOIN ( SELECT count( 1 ) AS orderNum, eo.create_user FROM express_order eo WHERE eo.create_user = #{userId} and eo.del_flag = 0 ) t ON t.create_user = u.id
-	LEFT JOIN ( SELECT COUNT( 1 ) AS pickUpNum, eu.userId FROM express_user eu WHERE eu.userId = #{userId} and eu.del_flag = 0) k ON k.userId = u.id
-WHERE
-	u.id = #{userId}
+	( SELECT count( 1 ) AS notPay, #{userId} AS userId FROM express_order WHERE create_user = #{userId} AND handle_state = 0 and del_flag = 0) np
+	LEFT JOIN ( SELECT count( 1 ) AS noOrder, #{userId} AS userId FROM express_order WHERE create_user = #{userId} AND handle_state = 1 and del_flag = 0) noo ON noo.userId = np.userId
+	LEFT JOIN ( SELECT count( 1 ) AS transport, #{userId} AS userId FROM express_order WHERE create_user = #{userId} AND handle_state = 2 and del_flag = 0) ts ON ts.userId = np.userId
+	LEFT JOIN ( SELECT count( 1 ) AS notComment, #{userId} AS userId FROM express_order WHERE create_user = #{userId} AND handle_state = 3 and del_flag = 0) nc ON nc.userId = np.userId
+	LEFT JOIN ( SELECT count( 1 ) AS complete, #{userId} AS userId FROM express_order WHERE create_user = #{userId} AND handle_state = 4 and del_flag = 0) c ON c.userId = np.userId
+	left join ( select count(1) as noComplete, #{userId} as userId from express_user where userId = #{userId} and complete_flag = 0 and del_flag = 0 ) euc on euc.userId = np.userId
+	left join ( select count(1) as complete, #{userId} as userId from express_user where userId = #{userId} and complete_flag = 1 and del_flag = 0 ) ec on ec.userId = np.userId
     </select>
 
 </mapper>

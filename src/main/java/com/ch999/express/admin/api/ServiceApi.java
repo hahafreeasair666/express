@@ -98,14 +98,14 @@ public class ServiceApi {
     }
 
     @PostMapping("/orderPayment/v1")
-    public Result<String> orderPayment(Integer orderId, Double price) {
+    public Result<String> orderPayment(Integer orderId, Double price,Integer integral) {
         if (orderId == null) {
             return Result.error("error", "请传入订单号");
         }
         if (price == null) {
             return Result.error("error", "请传入金额");
         }
-        Map<String, Object> map = expressOrderService.orderPayment(userComponent.getLoginUser().getId(), orderId, price);
+        Map<String, Object> map = expressOrderService.orderPayment(userComponent.getLoginUser().getId(), orderId, price,integral);
         if ((int) map.get("code") != 0) {
             return Result.error("error", map.get("msg").toString());
         }
@@ -207,6 +207,7 @@ public class ServiceApi {
         }
         return Result.success(orderDetailById);
     }
+
     //取消发送
 
     //取消接收

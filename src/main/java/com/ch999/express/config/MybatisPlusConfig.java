@@ -209,7 +209,7 @@ public class MybatisPlusConfig {
         // strategy.setExclude(new String[] { "productinfo", "view_product_spec"
         // }); // 排除生成的表
 
-        strategy.setInclude(new String[]{"address","express_comment","express_order","express_user","image","user_authentication","user_info"}); //
+        strategy.setInclude(new String[]{"detailed_log"}); //
         // 需要生成的表
 
         // 字段名生成策略
@@ -238,7 +238,7 @@ public class MybatisPlusConfig {
         mpg.setStrategy(strategy);
         // 包配置
         PackageConfig pc = new PackageConfig();
-        pc.setParent("com.haha666.express");
+        pc.setParent("com.ch999.express");
         pc.setModuleName("admin");
         pc.setController("controller");
 

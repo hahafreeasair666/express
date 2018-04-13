@@ -31,15 +31,17 @@ public interface ExpressOrderMapper extends BaseMapper<ExpressOrder> {
      * 个人中心发布的订单
      * @param page
      * @param userId
+     * @param state
      * @return
      */
-    List<ExpressOrder> getUserOrderList(Page<UserOrderVO> page, Integer userId);
+    List<ExpressOrder> getUserOrderList(Page<UserOrderVO> page, Integer userId,Integer state);
 
     /**
      * 个人中心帮人代取的订单
      * @param page
      * @param userId
+     * @param state
      * @return
      */
-    List<UserPickUpVO> selectUserPickUp(Page<UserPickUpVO> page, Integer userId);
+    List<UserPickUpVO> selectUserPickUp(Page<UserPickUpVO> page, Integer userId,Integer state);
 }

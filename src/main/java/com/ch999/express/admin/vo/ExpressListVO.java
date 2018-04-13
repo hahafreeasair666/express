@@ -3,6 +3,7 @@ package com.ch999.express.admin.vo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -14,6 +15,10 @@ import java.util.Map;
 public class ExpressListVO {
 
     private Integer orderId;
+
+    private String createAvatar;
+
+    private Date createTime;
 
     private Map<String,Object> employerInfo;
 

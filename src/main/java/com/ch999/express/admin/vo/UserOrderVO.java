@@ -14,5 +14,7 @@ public class UserOrderVO {
 
     private String expressPoint;
 
-    private String state;
+    private Integer state;
+
+
 }
