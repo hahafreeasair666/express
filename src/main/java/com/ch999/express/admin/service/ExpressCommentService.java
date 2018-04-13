@@ -3,6 +3,7 @@ package com.ch999.express.admin.service;
 import com.ch999.express.admin.entity.ExpressComment;
 import com.baomidou.mybatisplus.service.IService;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,4 +25,6 @@ public interface ExpressCommentService extends IService<ExpressComment> {
      * @return
      */
     Map<String,Object> addComment(Integer orderId,Integer userId,Integer star,String comment);
+
+    List<ExpressComment> getCommentList(Integer userId);
 }

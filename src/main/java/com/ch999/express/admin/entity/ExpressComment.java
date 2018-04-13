@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.annotations.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -54,19 +55,25 @@ public class ExpressComment extends Model<ExpressComment> {
     /**
      * 删除标志
      */
+    @JsonIgnore
     @TableField("del_flag")
     @TableLogic
     private Boolean delFlag;
+
+    @JsonIgnore
+    @TableField("user_id")
+    private Integer userId;
 
     @Override
     protected Serializable pkVal() {
         return this.id;
     }
 
-    public ExpressComment(Integer expressOrderId, Integer star, String employerComment) {
+    public ExpressComment(Integer expressOrderId, Integer star, String employerComment,Integer userId) {
         this.expressOrderId = expressOrderId;
         this.star = star;
         this.employerComment = employerComment;
+        this.userId = userId;
         this.createTime = new Date();
     }
 }

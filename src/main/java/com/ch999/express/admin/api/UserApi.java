@@ -7,10 +7,7 @@ import com.ch999.common.util.excel.ExcelImport;
 import com.ch999.common.util.vo.Result;
 import com.ch999.express.admin.component.UserComponent;
 import com.ch999.express.admin.document.UserWalletBO;
-import com.ch999.express.admin.entity.DetailedLog;
-import com.ch999.express.admin.entity.ExpressOrder;
-import com.ch999.express.admin.entity.UserAuthentication;
-import com.ch999.express.admin.entity.UserInfo;
+import com.ch999.express.admin.entity.*;
 import com.ch999.express.admin.repository.UserWalletBORepository;
 import com.ch999.express.admin.service.*;
 import com.ch999.express.admin.vo.*;
@@ -188,8 +185,8 @@ public class UserApi {
 
     @GetMapping("/getDetailLog/v1")
     public Result<List<DetailedLog>> getDetailLog(Integer type) {
-        return Result.success(detailedLogService.selectList(new EntityWrapper<DetailedLog>().eq("user_id", 4)
-                .eq("log_type", type)));
+        return Result.success(detailedLogService.selectList(new EntityWrapper<DetailedLog>().eq("user_id", userComponent.getLoginUser().getId())
+                .eq("log_type", type).orderBy("create_time",false)));
     }
 
     //获取最大可用积分数量
@@ -205,6 +202,13 @@ public class UserApi {
         map.put("ownedIntegral", one.getIntegral());
         map.put("canUseIntegral", one.getIntegral() < (int) integral ? one.getIntegral() : (int) integral);
         return Result.success(map);
+    }
+
+    //查看评论的列表
+
+    @GetMapping("/getCommentList/v1")
+    public Result<List<ExpressComment>> getCommentList(Integer userId){
+        return Result.success(expressCommentService.getCommentList(userId == null ? userComponent.getLoginUser().getId() : userId));
     }
 
 }

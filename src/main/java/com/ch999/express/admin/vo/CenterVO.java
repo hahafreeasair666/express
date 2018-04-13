@@ -18,4 +18,8 @@ public class CenterVO {
 
     private String avatar;
 
+    private Integer commentCount;
+
+    private Object score;
+
 }

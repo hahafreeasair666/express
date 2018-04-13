@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,18 +59,25 @@ public class ExpressCommentServiceImpl extends ServiceImpl<ExpressCommentMapper,
             return map;
         }else {
             // 先插入评价表再进行代取者信用分的计算
-            this.insert(new ExpressComment(orderId,star,comment));
             ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId).eq("complete_flag", 1));
+            this.insert(new ExpressComment(orderId,star,comment,expressUser.getUserId()));
             UserWalletBO one = userWalletBORepository.findOne(expressUser.getUserId());
             Integer num = getNum(star);
             one.setIntegral(one.getIntegral() + num);
             log.info("用户评价，修改代取者信用分：" + num +" 订单号："+ userId);
             userWalletBORepository.save(one);
             detailedLogService.insert(new DetailedLog(expressUser.getUserId(),3,"用户评价  信用分变更 " + num));
+            expressOrder.setHandleState(4);
+            expressOrderService.updateById(expressOrder);
             map.put("code",0);
             map.put("msg","评价成功");
             return map;
         }
+    }
+
+    @Override
+    public List<ExpressComment> getCommentList(Integer userId) {
+        return this.selectList(new EntityWrapper<ExpressComment>().eq("user_id",userId));
     }
 
 
