@@ -6,6 +6,7 @@ import com.ch999.common.util.vo.Result;
 import com.ch999.express.admin.component.ExpressComponent;
 import com.ch999.express.admin.component.UserComponent;
 import com.ch999.express.admin.entity.ExpressOrder;
+import com.ch999.express.admin.entity.ExpressUser;
 import com.ch999.express.admin.entity.Image;
 import com.ch999.express.admin.entity.UserAuthentication;
 import com.ch999.express.admin.service.ExpressOrderService;
@@ -206,6 +207,18 @@ public class ServiceApi {
             return Result.error("error","查看订单详情失败");
         }
         return Result.success(orderDetailById);
+    }
+
+    @GetMapping("/getPickUpPosition/v1")
+    public Result<String> getPickUpPosition(Integer orderId){
+        if(orderId == null){
+            return Result.error("error","请传入订单号");
+        }
+        ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId).eq("complete_flag", 0));
+        if(expressUser == null){
+            return Result.error("error","订单已完成，获取代取者坐标失败");
+        }
+        return Result.success(expressUser.getPosition());
     }
 
     //取消发送

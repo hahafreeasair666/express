@@ -26,5 +26,6 @@ public class UserWalletBO {
         this.userId = userId;
         this.balance = 0.0;
         this.integral = 0;
+        this.creditNum = 100;
     }
 }

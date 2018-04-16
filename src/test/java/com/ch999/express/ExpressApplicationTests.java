@@ -5,6 +5,7 @@ import com.ch999.express.admin.document.UserWalletBO;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.mapper.UserInfoMapper;
 import com.ch999.express.admin.repository.UserWalletBORepository;
+import com.ch999.express.admin.task.PickUpTimeTask;
 import com.ch999.express.admin.vo.ExpressVO;
 import com.ch999.express.common.MapTools;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 
 @RunWith(SpringRunner.class)
@@ -44,10 +46,11 @@ public class ExpressApplicationTests {
 		//userWalletBORepository.save(new UserWalletBO(1));
 		//erWalletBORepository.deleteAll();
 		UserWalletBO one = new UserWalletBO();
-		one.setUserId(4);
+		one.setUserId(3);
 		one.setBalance(10.0);
 		one.setIntegral(0);
 		one.setCreditNum(100);
-		userWalletBORepository.save(one);	}
+		userWalletBORepository.save(one);
+	}
 
 }

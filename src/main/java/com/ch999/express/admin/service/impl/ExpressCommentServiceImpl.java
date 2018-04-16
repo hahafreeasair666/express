@@ -66,7 +66,7 @@ public class ExpressCommentServiceImpl extends ServiceImpl<ExpressCommentMapper,
             one.setIntegral(one.getIntegral() + num);
             log.info("用户评价，修改代取者信用分：" + num +" 订单号："+ userId);
             userWalletBORepository.save(one);
-            detailedLogService.insert(new DetailedLog(expressUser.getUserId(),3,"用户评价  信用分变更 " + num));
+            detailedLogService.insert(new DetailedLog(expressUser.getUserId(),3,"用户评价: 信用分变更 " + num));
             expressOrder.setHandleState(4);
             expressOrderService.updateById(expressOrder);
             map.put("code",0);

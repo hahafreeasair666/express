@@ -26,5 +26,10 @@ public interface ExpressCommentService extends IService<ExpressComment> {
      */
     Map<String,Object> addComment(Integer orderId,Integer userId,Integer star,String comment);
 
+    /**
+     * 评价列表
+     * @param userId
+     * @return
+     */
     List<ExpressComment> getCommentList(Integer userId);
 }

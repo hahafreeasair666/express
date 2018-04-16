@@ -9,6 +9,7 @@ import com.ch999.express.admin.mapper.ExpressOrderMapper;
 import com.ch999.express.admin.repository.UserWalletBORepository;
 import com.ch999.express.admin.service.*;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.ch999.express.admin.task.CommentTimeTask;
 import com.ch999.express.admin.vo.*;
 import com.ch999.express.common.MapTools;
 import lombok.extern.slf4j.Slf4j;
@@ -290,6 +291,8 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             map.put("msg","订单确认收货成功，钱款已打到对方账户");
             detailedLogService.insert(new DetailedLog(expressUser.getUserId(),1,"确认订单：余额 +"+expressInfo.getPrice()+"元"));
             detailedLogService.insert(new DetailedLog(expressUser.getUserId(),2,"确认订单：积分 +"+((int)Math.ceil(expressInfo.getPrice()/2)+"分")));
+            Timer timer = new Timer("收货后评价检测定时器");
+            timer.schedule(new CommentTimeTask(expressUser.getUserId(),orderId,expressCommentService,detailedLogService,userWalletBORepository),172800L);
             return map;
         }
     }

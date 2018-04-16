@@ -7,6 +7,7 @@ import com.ch999.express.admin.entity.UserAuthentication;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.service.UserAuthenticationService;
 import com.ch999.express.admin.service.UserInfoService;
+import com.ch999.express.admin.task.PickUpTimeTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 /**
  * @author hahalala

@@ -7,17 +7,21 @@ import com.ch999.express.admin.entity.ExpressOrder;
 import com.ch999.express.admin.entity.ExpressUser;
 import com.ch999.express.admin.mapper.ExpressUserMapper;
 import com.ch999.express.admin.repository.UserWalletBORepository;
+import com.ch999.express.admin.service.DetailedLogService;
 import com.ch999.express.admin.service.ExpressOrderService;
 import com.ch999.express.admin.service.ExpressUserService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.ch999.express.admin.task.PickUpTimeTask;
 import com.ch999.express.common.MapTools;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 /**
  * <p>
@@ -36,7 +40,14 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
     @Resource
     private UserWalletBORepository userWalletBORepository;
 
+    @Resource
+    private ExpressUserService expressUserService;
+
+    @Resource
+    private DetailedLogService detailedLogService;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Map<String,Object> addPickUp(String position,Integer orderId,Integer userId) {
         Map<String,Object> map = new HashMap<>();
         ExpressOrder expressOrder = expressOrderService.selectById(orderId);
@@ -79,6 +90,8 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
             expressOrderService.updateById(expressOrder);
             map.put("code",0);
             map.put("msg","恭喜成功接单，快去帮去快递吧");
+            Timer timer = new Timer("接单后检测完成状态的定时器");
+            timer.schedule(new PickUpTimeTask(orderId,userId,expressUserService,userWalletBORepository,detailedLogService),7200L);
             return map;
         }
     }
