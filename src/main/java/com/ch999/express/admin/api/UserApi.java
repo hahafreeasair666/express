@@ -13,10 +13,7 @@ import com.ch999.express.admin.service.*;
 import com.ch999.express.admin.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -84,6 +81,10 @@ public class UserApi {
 
     //资料修改，认证资料不可修改
 
+    @PostMapping("/updateUserInfo/{type}/v1")
+    public Result<String> updateUserInfo(@PathVariable("type") String type,UpdateUserInfoVO updateUserInfoVO){
+        return null;
+    }
 
     //地址crud
 

@@ -9,10 +9,7 @@ import com.ch999.express.admin.entity.ExpressOrder;
 import com.ch999.express.admin.entity.ExpressUser;
 import com.ch999.express.admin.entity.Image;
 import com.ch999.express.admin.entity.UserAuthentication;
-import com.ch999.express.admin.service.ExpressOrderService;
-import com.ch999.express.admin.service.ExpressUserService;
-import com.ch999.express.admin.service.ImgService;
-import com.ch999.express.admin.service.UserAuthenticationService;
+import com.ch999.express.admin.service.*;
 import com.ch999.express.admin.vo.ExpressDetailVO;
 import com.ch999.express.admin.vo.ExpressListVO;
 import com.ch999.express.admin.vo.ExpressVO;
@@ -55,6 +52,9 @@ public class ServiceApi {
 
     @Resource
     private ImgService imgService;
+
+    @Resource
+    private RechargeService rechargeService;
 
     //图片上传
 
@@ -221,6 +221,26 @@ public class ServiceApi {
         return Result.success(expressUser.getPosition());
     }
 
+    @PostMapping("/rechargeCode/v1")
+    public Result<String> rechargeCode(String code){
+        if(StringUtils.isBlank(code)){
+            return Result.error("error","请输入充值码");
+        }
+        Map<String, Object> recharge = rechargeService.rechargeCode(userComponent.getLoginUser().getId(), code);
+        if((int)recharge.get("code") != 0){
+            return Result.error("error",recharge.get("msg").toString());
+        }
+        return Result.success("success",recharge.get("msg").toString(),null);
+    }
+
+    @PostMapping("/recharge/v1")
+    public Result<String> recharge(Double price){
+        if(price == null || price == 0.0){
+            return Result.error("error","请选择要充值的金额");
+        }
+        rechargeService.recharge(userComponent.getLoginUser().getId(),price);
+        return Result.success("success","充值成功",null);
+    }
     //取消发送
 
     //取消接收

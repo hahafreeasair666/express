@@ -1,10 +1,13 @@
 package com.ch999.express;
 
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.ch999.express.admin.component.HandleStaticJson;
 import com.ch999.express.admin.document.UserWalletBO;
+import com.ch999.express.admin.entity.Recharge;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.mapper.UserInfoMapper;
 import com.ch999.express.admin.repository.UserWalletBORepository;
+import com.ch999.express.admin.service.RechargeService;
 import com.ch999.express.admin.task.PickUpTimeTask;
 import com.ch999.express.admin.vo.ExpressVO;
 import com.ch999.express.common.MapTools;
@@ -33,6 +36,9 @@ public class ExpressApplicationTests {
 	@Resource
 	private UserWalletBORepository userWalletBORepository;
 
+	@Resource
+	private RechargeService rechargeService;
+
 	@Test
 	public void contextLoads() throws IOException{
 		/*List<ExpressVO> nefuExpressPoint = handleStaticJson.getNefuExpressPoint();
@@ -51,6 +57,24 @@ public class ExpressApplicationTests {
 		one.setIntegral(0);
 		one.setCreditNum(100);
 		userWalletBORepository.save(one);
+	}
+
+	@Test
+	public void addRecharge(){
+		for(int i = 0; i < 100; i++){
+            double random = Math.random();
+            Recharge recharge = new Recharge(IdWorker.get32UUID());
+            if(random < 0.25){
+				recharge.setPrice(50.0);
+			}else if(random >= 0.25 && random < 0.5){
+                recharge.setPrice(30.0);
+            }else if(random >= 0.5 && random < 0.75){
+                recharge.setPrice(20.0);
+            }else {
+                recharge.setPrice(10.0);
+            }
+            rechargeService.insert(recharge);
+		}
 	}
 
 }
