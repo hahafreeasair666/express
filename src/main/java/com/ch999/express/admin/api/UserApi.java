@@ -54,6 +54,9 @@ public class UserApi {
     @Resource
     private ExpressCommentService expressCommentService;
 
+    @Resource
+    private ImgService imgService;
+
     //认证
 
     @PostMapping("/Authentication/v1")
@@ -83,13 +86,59 @@ public class UserApi {
 
     @PostMapping("/updateUserInfo/{type}/v1")
     public Result<String> updateUserInfo(@PathVariable("type") String type,UpdateUserInfoVO updateUserInfoVO){
-        return null;
+        if(StringUtils.isBlank(type)){
+            return Result.error("error","请选择要修改的内容");
+        }
+        UserInfo loginUser = userComponent.getLoginUser();
+        UserInfo userInfo = userInfoService.selectById(loginUser.getId());
+        switch (type){
+            case UpdateUserInfoVO.NAME:
+                if(StringUtils.isBlank(updateUserInfoVO.getUserName())){
+                    return Result.error("error","请传入要修改的用户名");
+                }else if(!updateUserInfoVO.getUserName().equals(loginUser.getUserName()) && !userInfoService.checkCanUse("user_name", updateUserInfoVO.getUserName())){
+                    return Result.error("error","改用户名已被别的用户占用");
+                }
+                userInfo.setUserName(updateUserInfoVO.getUserName());
+                break;
+            case UpdateUserInfoVO.PWD:
+                if(StringUtils.isBlank(updateUserInfoVO.getOldPwd())|| StringUtils.isBlank(updateUserInfoVO.getNewPwd())){
+                    return Result.error("error","请传入新老密码");
+                }else if(!updateUserInfoVO.getOldPwd().equals(loginUser.getPwd())){
+                    return Result.error("error","旧密码输入错误请重试");
+                }
+                userInfo.setPwd(updateUserInfoVO.getNewPwd());
+                break;
+            case UpdateUserInfoVO.MOBILE:
+                if(StringUtils.isBlank(updateUserInfoVO.getMobile())){
+                    return Result.error("error","请输入新的电话号码");
+                }else if(!updateUserInfoVO.getMobile().matches(UpdateUserInfoVO.CK)){
+                    return Result.error("error","请输入正确的电话号码");
+                }else if(!updateUserInfoVO.getMobile().equals(loginUser.getMobile()) && !userInfoService.checkCanUse("mobile", updateUserInfoVO.getMobile())){
+                    return Result.error("error","改手机号已被别的用户占用");
+                }
+                userInfo.setMobile(updateUserInfoVO.getMobile());
+                break;
+            case UpdateUserInfoVO.AVATAR:
+                if(updateUserInfoVO.getFile() == null){
+                    return Result.error("error","请选择要更换的头像");
+                }
+                Image image = imgService.uploadImg(updateUserInfoVO.getFile());
+                userInfo.setAvatar(image.getUrl());
+                break;
+            default:
+                break;
+        }
+        userInfoService.updateById(userInfo);
+        return Result.success();
     }
 
     //地址crud
 
     @PostMapping("/addOrUpdateAddress/v1")
     public Result<String> addOrUpdateAddress(@Valid AddUpdateAddressVO addUpdateAddressVO) {
+        if(!addUpdateAddressVO.getMobile().matches(UpdateUserInfoVO.CK)){
+            return Result.error("error", "请传入正确的电话号码");
+        }
         Boolean aBoolean = addressService.addOrUpdateAddress(userComponent.getLoginUser().getId(), addUpdateAddressVO);
         if (!aBoolean) {
             return Result.error("error", "操作失败");
