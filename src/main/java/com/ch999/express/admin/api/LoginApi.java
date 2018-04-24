@@ -7,17 +7,14 @@ import com.ch999.express.admin.entity.UserAuthentication;
 import com.ch999.express.admin.entity.UserInfo;
 import com.ch999.express.admin.service.UserAuthenticationService;
 import com.ch999.express.admin.service.UserInfoService;
-import com.ch999.express.admin.task.PickUpTimeTask;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
+import java.util.*;
+
 
 /**
  * @author hahalala
@@ -102,5 +99,36 @@ public class LoginApi {
             }
             return Result.error("error", "很遗憾该手机号已被使用");
         }
+    }
+
+    public static void main(String[] args) {
+        char[][] charArray = {{'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'}};
+        String str = "AABCE";
+        System.out.println(ts(charArray,str));
+    }
+
+    private static Boolean ts (char[][] charArray,String str){
+        Map<Character,Integer> map1 = new HashMap<>();
+        Map<Character,Integer> map2 = new HashMap<>();
+        for (char[] aCharArray : charArray) {
+            for (char anACharArray : aCharArray) {
+                Integer integer = map1.get(anACharArray);
+                map1.put(anACharArray,integer==null?1:integer+1);
+            }
+        }
+        char[] chars = str.toCharArray();
+        for (char anACharArray : chars) {
+            Integer integer = map2.get(anACharArray);
+            map2.put(anACharArray,integer==null?1:integer+1);
+        }
+        List<Boolean> list = new ArrayList<>();
+        map2.forEach((key, value) -> {
+            if (map1.get(key) == null || map1.get(key) < value) {
+                list.add(false);
+            }else {
+                list.add(true);
+            }
+        });
+        return list.stream().allMatch(li->li == true);
     }
 }

@@ -47,7 +47,7 @@ public class UserComponent {
         final String authorization = IdWorker.get32UUID();
         ExpressUserBO userBO = new ExpressUserBO(USERID_PIX + authorization, userId);
         if (isLogonFree) {
-            userBO.setLiveTime(604800);
+            userBO.setLiveTime(604800L);
         }
         expressUserBORepository.save(userBO);
         return authorization;
