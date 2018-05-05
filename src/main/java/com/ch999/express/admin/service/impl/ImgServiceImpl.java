@@ -27,9 +27,9 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class ImgServiceImpl implements ImgService {
 
-    private static final String IMGSERVER = "http://120.79.160.214:9333";
+    private static final String IMG_SERVER = "http://120.79.160.214:9333";
 
-    private static final String IMGUPLOAG_URL = "/submit";
+    private static final String IMG_UPLOAD_URL = "/submit";
 
     //private ReentrantLock lock = new ReentrantLock();
 
@@ -53,7 +53,7 @@ public class ImgServiceImpl implements ImgService {
             log.error("压缩图片异常");
         }
         Image imgs = new Image();
-        String s = HttpClientUtil.uploadFile(IMGSERVER, IMGUPLOAG_URL, file, file1);
+        String s = HttpClientUtil.uploadFile(IMG_SERVER, IMG_UPLOAD_URL, file, file1);
         file1.delete();
         log.info("上传完毕，删除压缩图片");
         ImageRes imageRes = JSON.parseObject(s, ImageRes.class);
@@ -73,15 +73,15 @@ public class ImgServiceImpl implements ImgService {
         String[] split = name.split("\\.");
         if (split.length < 2) {
             return false;
-        } else if (split[1].equals("jpg")) {
+        } else if ("jpg".equals(split[1])) {
             return true;
-        } else if (split[1].equals("png")) {
+        } else if ("png".equals(split[1])) {
             return true;
-        } else if (split[1].equals("gif")) {
+        } else if ("gif".equals(split[1])) {
             return true;
-        } else if (split[1].equals("jpeg")) {
+        } else if ("jpeg".equals(split[1])) {
             return true;
-        } else if (split[1].equals("bmp")) {
+        } else if ("bmp".equals(split[1])) {
             return true;
         }
         return false;
@@ -100,4 +100,5 @@ public class ImgServiceImpl implements ImgService {
             return null;
         }
     }*/
+
 }

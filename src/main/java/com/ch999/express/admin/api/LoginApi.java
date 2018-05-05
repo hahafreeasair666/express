@@ -55,7 +55,7 @@ public class LoginApi {
 
     @PostMapping("/login/v1")
     public Result<Map<String, Object>> login(String loginInfo, String pwd, Boolean isLongLogin) {
-        UserInfo userInfo = null;
+        UserInfo userInfo;
         UserInfo userInfo2 = userInfoService.selectOne(new EntityWrapper<UserInfo>().eq("user_name", loginInfo).eq("pwd", pwd));
         UserInfo userInfo1 = userInfoService.selectOne(new EntityWrapper<UserInfo>().eq("mobile", loginInfo).eq("pwd", pwd));
         userInfo = userInfo1 != null ? userInfo1 : userInfo2;
@@ -88,7 +88,7 @@ public class LoginApi {
 
     @PostMapping("/checkUserNameOrMobileIsCanUse/v1")
     public Result<String> checkUserNameOrMobileIsCanUse(String type, String info) {
-        if (type.equals("userName")) {
+        if ("userName".equals(type)) {
             if (userInfoService.checkCanUse("user_name", info)) {
                 return Result.success("success", "恭喜该用户名可以使用", null);
             }
@@ -101,34 +101,4 @@ public class LoginApi {
         }
     }
 
-    public static void main(String[] args) {
-        char[][] charArray = {{'A','B','C','E'},{'S','F','C','S'},{'A','D','E','E'}};
-        String str = "AABCE";
-        System.out.println(ts(charArray,str));
-    }
-
-    private static Boolean ts (char[][] charArray,String str){
-        Map<Character,Integer> map1 = new HashMap<>();
-        Map<Character,Integer> map2 = new HashMap<>();
-        for (char[] aCharArray : charArray) {
-            for (char anACharArray : aCharArray) {
-                Integer integer = map1.get(anACharArray);
-                map1.put(anACharArray,integer==null?1:integer+1);
-            }
-        }
-        char[] chars = str.toCharArray();
-        for (char anACharArray : chars) {
-            Integer integer = map2.get(anACharArray);
-            map2.put(anACharArray,integer==null?1:integer+1);
-        }
-        List<Boolean> list = new ArrayList<>();
-        map2.forEach((key, value) -> {
-            if (map1.get(key) == null || map1.get(key) < value) {
-                list.add(false);
-            }else {
-                list.add(true);
-            }
-        });
-        return list.stream().allMatch(li->li == true);
-    }
 }
