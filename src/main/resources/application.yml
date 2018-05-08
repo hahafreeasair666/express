@@ -5,9 +5,8 @@ server:
   session:
     cookie:
       http-only: true
-    timeout: 20
   context-path: /express
-  port: 6666
+  port: 9111
   max-http-header-size: 1000000
 
 info:

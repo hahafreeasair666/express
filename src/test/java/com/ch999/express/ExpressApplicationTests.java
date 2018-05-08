@@ -39,42 +39,44 @@ public class ExpressApplicationTests {
 	@Resource
 	private RechargeService rechargeService;
 
-	@Test
-	public void contextLoads() throws IOException{
-		/*List<ExpressVO> nefuExpressPoint = handleStaticJson.getNefuExpressPoint();
-		nefuExpressPoint.get(1).getAddress();
-		System.out.println();*/
-		//List<UserInfo> test = userInfoMapper.test();
-		//List<ExpressVO> address = MapTools.getAddressByKeyWord("东北林业大学");
-		//MapTools.getDistanceByPosition("45.736677,126.670352", "45.720472871,126.6417633");
-		//List<Map<String, Object>> simpleExpressPoint = handleStaticJson.getSimpleExpressPoint();
-		//System.out.println();
-		//userWalletBORepository.save(new UserWalletBO(1));
-		//erWalletBORepository.deleteAll();
-		UserWalletBO one = new UserWalletBO();
-		one.setUserId(3);
-		one.setBalance(10.0);
-		one.setIntegral(0);
-		one.setCreditNum(100);
-		userWalletBORepository.save(one);
-	}
-
+//	@Test
+//	public void contextLoads() throws IOException{
+//		/*List<ExpressVO> nefuExpressPoint = handleStaticJson.getNefuExpressPoint();
+//		nefuExpressPoint.get(1).getAddress();
+//		System.out.println();*/
+//		//List<UserInfo> test = userInfoMapper.test();
+//		//List<ExpressVO> address = MapTools.getAddressByKeyWord("东北林业大学");
+//		//MapTools.getDistanceByPosition("45.736677,126.670352", "45.720472871,126.6417633");
+//		//List<Map<String, Object>> simpleExpressPoint = handleStaticJson.getSimpleExpressPoint();
+//		//System.out.println();
+//		//userWalletBORepository.save(new UserWalletBO(1));
+//		//erWalletBORepository.deleteAll();
+//		UserWalletBO one = new UserWalletBO();
+//		one.setUserId(3);
+//		one.setBalance(10.0);
+//		one.setIntegral(0);
+//		one.setCreditNum(100);
+//		userWalletBORepository.save(one);
+//	}
+//
+//	@Test
+//	public void addRecharge(){
+//		for(int i = 0; i < 100; i++){
+//            double random = Math.random();
+//            Recharge recharge = new Recharge(IdWorker.get32UUID());
+//            if(random < 0.25){
+//				recharge.setPrice(50.0);
+//			}else if(random >= 0.25 && random < 0.5){
+//                recharge.setPrice(30.0);
+//            }else if(random >= 0.5 && random < 0.75){
+//                recharge.setPrice(20.0);
+//            }else {
+//                recharge.setPrice(10.0);
+//            }
+//            rechargeService.insert(recharge);
+//		}
+//	}
 	@Test
 	public void addRecharge(){
-		for(int i = 0; i < 100; i++){
-            double random = Math.random();
-            Recharge recharge = new Recharge(IdWorker.get32UUID());
-            if(random < 0.25){
-				recharge.setPrice(50.0);
-			}else if(random >= 0.25 && random < 0.5){
-                recharge.setPrice(30.0);
-            }else if(random >= 0.5 && random < 0.75){
-                recharge.setPrice(20.0);
-            }else {
-                recharge.setPrice(10.0);
-            }
-            rechargeService.insert(recharge);
-		}
-	}
-
+  }
 }
