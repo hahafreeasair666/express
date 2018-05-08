@@ -7,6 +7,7 @@ server:
       http-only: true
   context-path: /express
   port: 6666
+  max-http-header-size: 255
 
 info:
   app:
