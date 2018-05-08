@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.ch999.express.admin.vo.ExpressListVO;
 import com.ch999.express.admin.vo.UserOrderVO;
 import com.ch999.express.admin.vo.UserPickUpVO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public interface ExpressOrderMapper extends BaseMapper<ExpressOrder> {
      * @param userId
      * @return
      */
-    List<ExpressOrder> getOrderList(Page<ExpressListVO> page,Integer userId);
+    List<ExpressOrder> getOrderList(Page<ExpressListVO> page,@Param("userId") Integer userId);
 
     /**
      * 个人中心发布的订单
@@ -34,7 +35,7 @@ public interface ExpressOrderMapper extends BaseMapper<ExpressOrder> {
      * @param state
      * @return
      */
-    List<ExpressOrder> getUserOrderList(Page<UserOrderVO> page, Integer userId,Integer state);
+    List<ExpressOrder> getUserOrderList(Page<UserOrderVO> page, @Param("userId")Integer userId,@Param("state")Integer state);
 
     /**
      * 个人中心帮人代取的订单
@@ -43,5 +44,5 @@ public interface ExpressOrderMapper extends BaseMapper<ExpressOrder> {
      * @param state
      * @return
      */
-    List<UserPickUpVO> selectUserPickUp(Page<UserPickUpVO> page, Integer userId,Integer state);
+    List<UserPickUpVO> selectUserPickUp(Page<UserPickUpVO> page, @Param("userId")Integer userId,@Param("state")Integer state);
 }

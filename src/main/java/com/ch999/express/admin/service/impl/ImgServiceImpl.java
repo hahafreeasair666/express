@@ -54,8 +54,10 @@ public class ImgServiceImpl implements ImgService {
         }
         Image imgs = new Image();
         String s = HttpClientUtil.uploadFile(IMG_SERVER, IMG_UPLOAD_URL, file, file1);
-        file1.delete();
-        log.info("上传完毕，删除压缩图片");
+        if(file1 != null) {
+            file1.delete();
+            log.info("上传完毕，删除压缩图片");
+        }
         ImageRes imageRes = JSON.parseObject(s, ImageRes.class);
         String fid = imageRes.getFid();
         String fileName = imageRes.getFileName();

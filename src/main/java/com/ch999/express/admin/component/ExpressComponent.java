@@ -43,6 +43,7 @@ public class ExpressComponent {
                     List<ExpressVO> nefuExpressPoint = handleStaticJson.getNefuExpressPoint();
                     return nefuExpressPoint;
                 } catch (IOException e) {
+                    log.error(e.toString());
                     log.error("Json解析失败，获取东林快递点失败");
                 }
             }

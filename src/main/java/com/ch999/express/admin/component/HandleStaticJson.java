@@ -3,11 +3,13 @@ package com.ch999.express.admin.component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ch999.express.admin.vo.ExpressVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +24,7 @@ import java.util.stream.Stream;
  * @author hahalala
  */
 @Component
+@Slf4j
 public class  HandleStaticJson {
 
 
@@ -36,10 +39,8 @@ public class  HandleStaticJson {
     public List<ExpressVO> getNefuExpressPoint() throws IOException{
         Resource resource = new ClassPathResource("static/neFuPoint.json");
         InputStream inputStream = resource.getInputStream();
-        byte[] filecontent = new byte[(int)resource.getFile().length()];
-        inputStream.read(filecontent);
-        inputStream.close();
-        Map map = JSONObject.parseObject(new String(filecontent, "utf-8"), Map.class);
+        byte[] bytes = FileCopyUtils.copyToByteArray(inputStream);
+        Map map = JSONObject.parseObject(new String(bytes, "utf-8"), Map.class);
         List<ExpressVO> data = JSONArray.parseArray(map.get("data").toString(), ExpressVO.class);
         return data;
     }

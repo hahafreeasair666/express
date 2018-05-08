@@ -223,6 +223,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId));
             if(expressUser != null){
                 UserInfo userInfo = userInfoService.selectById(expressUser.getUserId());
+                employeeInfo.put("id",userInfo.getId());
                 employeeInfo.put("name",userInfo.getRealName());
                 employeeInfo.put("mobile",userInfo.getMobile());
                 Integer distanceByPosition = MapTools.getDistanceByPosition(expressUser.getPosition(), addressInfoVO.getPosition());
@@ -337,6 +338,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             expressListVO.setExpressInfo(liExpressInfo);
             expressListVO.setDistanceInfo(distanceInfo);
             employerInfo.put("employerName", addressInfo.get("name"));
+            employerInfo.put("employerId",li.getCreateUser());
             if (isGetDetail) {
                 employerInfo.put("employMobile", addressInfo.get("mobile"));
                 liExpressInfo.put("expressMobile", expressInfo.getExpressMobile());
