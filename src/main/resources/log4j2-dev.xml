@@ -27,11 +27,11 @@
 
     <!-- Mixed sync/async -->
     <Loggers>
-        <!--<Root level="DEBUG" includeLocation="true">
+        <Root level="INFO" includeLocation="true">
             <AppenderRef ref="console"/>
-        </Root>-->
+        </Root>
 
-        <AsyncRoot level="info" includeLocation="true">
+        <AsyncRoot level="INFO" includeLocation="true">
             <AppenderRef ref="console"/>
         </AsyncRoot>
         <logger name="com.ch999.express" level="DEBUG"/>

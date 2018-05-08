@@ -257,6 +257,33 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <locales>zh_CN</locales>
+                    <reportPlugins>
+                        <!-- 打包跳过测试类代码 -->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-report-plugin</artifactId>
+                            <version>2.20</version>
+                            <configuration>
+                                <skipTests>true</skipTests>
+                            </configuration>
+                        </plugin>
+                    </reportPlugins>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.wagon</groupId>
+                        <artifactId>wagon-webdav</artifactId>
+                        <version>1.0-beta-2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
         </plugins>
         <resources>
             <resource>

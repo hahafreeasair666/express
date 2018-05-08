@@ -86,7 +86,7 @@ public class LoginApi {
         return Result.error("error", "退出登录失败,用户未登录");
     }
 
-    @PostMapping("/checkUserNameOrMobileIsCanUse/v1")
+    @GetMapping("/checkInfoIsCanUse/v1")
     public Result<String> checkUserNameOrMobileIsCanUse(String type, String info) {
         if ("userName".equals(type)) {
             if (userInfoService.checkCanUse("user_name", info)) {
