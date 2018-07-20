@@ -171,11 +171,11 @@ public class ServiceApi {
         if(StringUtils.isBlank(position)){
             return Result.error("error","请允许获取手机位置后再来查看");
         }
-        ExpressListVO orderDetailById = expressOrderService.getOrderDetailById(position, 4, orderId);
+        ExpressListVO orderDetailById = expressOrderService.getOrderDetailById(position, userComponent.getLoginUser().getId(), orderId);
         if(orderDetailById == null){
             return Result.error("error","改订单不是您的，无权查看详细信息");
         }else if(orderDetailById.getOrderId() == null){
-            return Result.error("error","订单查询失败");
+            return Result.error("error","订单查询失败,或因您所在位置太远");
         }else {
             return Result.success(orderDetailById);
         }

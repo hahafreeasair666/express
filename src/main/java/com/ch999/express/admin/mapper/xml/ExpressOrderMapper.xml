@@ -14,7 +14,7 @@
     </resultMap>
 
     <select id="getOrderList" resultMap="BaseResultMap">
-        select * from express_order where handle_state = 1
+        select * from express_order where handle_state = 1 and del_flag = 0
         <if test=" userId != null">
             and create_user = #{userId}
         </if>

@@ -78,5 +78,8 @@ public class ExpressApplicationTests {
 //	}
 	@Test
 	public void addRecharge(){
-  }
+		/*UserWalletBO one = userWalletBORepository.findOne(5);
+		one.setCreditNum(100);
+		userWalletBORepository.save(one);*/
+	}
 }

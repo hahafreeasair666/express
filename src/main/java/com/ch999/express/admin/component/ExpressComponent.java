@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static com.ch999.express.common.Distance.getDistance;
+
 /**
  * @author hahalala
  */
@@ -37,8 +39,8 @@ public class ExpressComponent {
         Object addressInfo = addressById.get("addressInfo");
         if (addressInfo != null) {
             Map addressInfo1 = (Map) addressInfo;
-            Integer dictance = MapTools.getDistanceByPosition(NEFU_POSITION, addressInfo1.get("position").toString());
-            if (dictance != null && dictance <= 2000 && dictance != -1) {
+            Double dictance = getDistance(NEFU_POSITION, addressInfo1.get("position").toString());
+            if (dictance <= 2000.0 && dictance != -1) {
                 try {
                     List<ExpressVO> nefuExpressPoint = handleStaticJson.getNefuExpressPoint();
                     return nefuExpressPoint;

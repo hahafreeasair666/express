@@ -14,12 +14,15 @@ import com.ch999.express.admin.vo.*;
 import com.ch999.express.common.MapTools;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.ibatis.jdbc.Null;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.ch999.express.common.Distance.getDistance;
 
 /**
  * <p>
@@ -58,7 +61,7 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
     public Map<String, Object> addExpressOrder(Integer userId, Integer addressId, ExpressOrder.ExpressInfo expressInfo) {
         //先验算距离，收货地址到快递点超过10km不让发布
         Address.AddressInfoVO addressInfoVO = JSONObject.parseObject(addressService.getAddressById(addressId).get("addressInfo").toString(), Address.AddressInfoVO.class);
-        Integer distanceByPosition = MapTools.getDistanceByPosition(addressInfoVO.getPosition(), expressInfo.getPosition());
+        Double distanceByPosition = getDistance(addressInfoVO.getPosition(), expressInfo.getPosition());
         if (distanceByPosition == -1) {
             return null;
         }
@@ -115,11 +118,11 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         } else {
             map.put("code", 0);
             map.put("msg", "支付成功，本次支付：" + price + "元，余额：" + (one.getBalance() - price + integral/100.0) + "元,获得：" + (price.intValue() - (int)Math.ceil(integral/100.0)) + "积分");
-            one.setBalance(one.getBalance() - price);
+            one.setBalance(one.getBalance() - price + integral/100.0);
             one.setIntegral(one.getIntegral() + price.intValue() - integral);
             userWalletBORepository.save(one);
             expressOrder.setHandleState(1);
-            detailedLogService.insert(new DetailedLog(userId,1,"下单：余额 -"+price+"元"));
+            detailedLogService.insert(new DetailedLog(userId,1,"下单：余额 -"+(price - integral / 100.0)+"元"));
             if(integral > 0){
                 detailedLogService.insert(new DetailedLog(userId,2,"使用积分付款：积分 -"+integral+"分"));
             }
@@ -176,9 +179,9 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         //排序
         List<ExpressListVO> listVOS2 = new ArrayList<>();
         if (sortByDistance2) {
-            listVOS2 = listVOS.stream().sorted(Comparator.comparing(li -> (int) li.getDistanceInfo().get("distance2"))).collect(Collectors.toList());
+            listVOS2 = listVOS.stream().sorted(Comparator.comparing(li -> (double) li.getDistanceInfo().get("distance2"))).collect(Collectors.toList());
         } else if (sortByDistance1) {
-            listVOS2 = listVOS.stream().sorted(Comparator.comparing(li -> (int) li.getDistanceInfo().get("distance1"))).collect(Collectors.toList());
+            listVOS2 = listVOS.stream().sorted(Comparator.comparing(li -> (double) li.getDistanceInfo().get("distance1"))).collect(Collectors.toList());
         } else if (sortByPrice) {
             listVOS2 = listVOS.stream().sorted(Comparator.comparing(ExpressListVO::getPrice, Comparator.reverseOrder())).collect(Collectors.toList());
         }
@@ -223,10 +226,11 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             ExpressUser expressUser = expressUserService.selectOne(new EntityWrapper<ExpressUser>().eq("express_order_id", orderId));
             if(expressUser != null){
                 UserInfo userInfo = userInfoService.selectById(expressUser.getUserId());
+
                 employeeInfo.put("id",userInfo.getId());
                 employeeInfo.put("name",userInfo.getRealName());
                 employeeInfo.put("mobile",userInfo.getMobile());
-                Integer distanceByPosition = MapTools.getDistanceByPosition(expressUser.getPosition(), addressInfoVO.getPosition());
+                Double distanceByPosition = getDistance(expressUser.getPosition(), addressInfoVO.getPosition());
                 employeeInfo.put("distance","代取快递的人距离您" + distanceByPosition +"米");
             }
             ExpressOrder.ExpressInfo expressInfo1 = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
@@ -293,19 +297,19 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             detailedLogService.insert(new DetailedLog(expressUser.getUserId(),1,"确认订单：余额 +"+expressInfo.getPrice()+"元"));
             detailedLogService.insert(new DetailedLog(expressUser.getUserId(),2,"确认订单：积分 +"+((int)Math.ceil(expressInfo.getPrice()/2)+"分")));
             Timer timer = new Timer("收货后评价检测定时器");
-            timer.schedule(new CommentTimeTask(expressUser.getUserId(),orderId,expressCommentService,detailedLogService,userWalletBORepository),172800L);
+            timer.schedule(new CommentTimeTask(expressUser.getUserId(),orderId,expressCommentService,detailedLogService,userWalletBORepository),172800000L);
             return map;
         }
     }
 
-    private Double handlePrice(Integer weight, Integer distance, Double tip) {
+    private Double handlePrice(Integer weight, Double distance, Double tip) {
         Integer price = 0;
         if (distance > 0 && distance < 1000) {
             price = 2;
         } else if (distance >= 1000 && distance < 2000) {
             price = 3;
         } else if (distance >= 2000) {
-            Integer d = distance - 2000;
+            Integer d = (int)(distance - 2000);
             price = 4 + d % 500;
         }
         return weight * price + tip;
@@ -324,13 +328,14 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
         }
     }
 
-    private ExpressListVO assembleExpressInfo(String position, ExpressOrder li, Boolean isGetDetail,ExpressUser expressUser) {
+    private ExpressListVO assembleExpressInfo(String position, ExpressOrder li, Boolean isGetDetail,ExpressUser expressUser) throws NullPointerException {
         ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(li.getExpressInfo(), ExpressOrder.ExpressInfo.class);
-        Integer distance = MapTools.getDistanceByPosition(expressInfo.getPosition(), position);
+        Double distance = getDistance(expressInfo.getPosition(), position);
         if (distance < 5000 && distance > 0) {
             ExpressListVO expressListVO = new ExpressListVO();
             expressListVO.setOrderId(li.getId());
-            Map addressInfo = JSONObject.parseObject(addressService.getAddressById(li.getAddress()).get("addressInfo").toString(), Map.class);
+            Map<String, Object> addressById = addressService.getAddressById(li.getAddress());
+            Map addressInfo = JSONObject.parseObject(addressById.get("addressInfo").toString(), Map.class);
             Map<String, Object> employerInfo = new HashMap<>();
             Map<String, Object> liExpressInfo = new HashMap<>();
             Map<String, Object> distanceInfo = new HashMap<>();
@@ -351,10 +356,10 @@ public class ExpressOrderServiceImpl extends ServiceImpl<ExpressOrderMapper, Exp
             liExpressInfo.put("expressAddress", expressInfo.getExpressAddress());
             liExpressInfo.put("weight", getWeight(expressInfo.getWeight()));
             expressListVO.setPrice(expressInfo.getPrice());
-            distanceInfo.put("distance1", distance + "米");
+            distanceInfo.put("distance1", distance);
             distanceInfo.put("tips1", "您到达快递点步行需要" + Math.ceil(distance / MapTools.AVGWALKSPEED) + "分钟");
-            Integer distance2 = MapTools.getDistanceByPosition(expressInfo.getPosition(), addressInfo.get("position").toString());
-            distanceInfo.put("distance2", distance2 + "米");
+            Double distance2 = getDistance(expressInfo.getPosition(), addressInfo.get("position").toString());
+            distanceInfo.put("distance2", distance2);
             distanceInfo.put("tips2", "从快递点到收货点步行需要" + Math.ceil(distance2 / MapTools.AVGWALKSPEED) + "分钟");
             expressListVO.setCreateTime(li.getCreateTime());
             expressListVO.setCreateAvatar(userInfoService.selectById(li.getCreateUser()).getAvatar());

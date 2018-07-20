@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static com.ch999.express.common.Distance.getDistance;
 
 /**
  * <p>
@@ -66,7 +69,7 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
                 return map;
             }
             ExpressOrder.ExpressInfo expressInfo = JSONObject.parseObject(expressOrder.getExpressInfo(), ExpressOrder.ExpressInfo.class);
-            if(MapTools.getDistanceByPosition(position,expressInfo.getPosition()) == -1){
+            if(getDistance(position,expressInfo.getPosition()) > 10000.0){
                 map.put("code",5000);
                 map.put("msg","您距快递点距离过远，还是把机会让给别人吧");
                 return map;
@@ -91,7 +94,8 @@ public class ExpressUserServiceImpl extends ServiceImpl<ExpressUserMapper, Expre
             map.put("code",0);
             map.put("msg","恭喜成功接单，快去帮去快递吧");
             Timer timer = new Timer("接单后检测完成状态的定时器");
-            timer.schedule(new PickUpTimeTask(orderId,userId,expressUserService,userWalletBORepository,detailedLogService),7200L);
+            //注意延迟是毫秒数
+            timer.schedule(new PickUpTimeTask(orderId,userId,expressUserService,userWalletBORepository,detailedLogService),7200000L);
             return map;
         }
     }
